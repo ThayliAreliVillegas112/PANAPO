@@ -57,48 +57,27 @@ export const ClientList = ({ handleClose }) => {
 
     const formik = useFormik({
         initialValues: {
-            name: "",
-            surname: "",
-            secondSurname: "",
-            phoneClient: "",
-            extension: "",
-            emailClient: "",
             company: "",
+            emailClient: "",
             emailRepre: "",
+            extension: "",
+            name: "",
             nameRepre: "",
-            surnameRepre: "",
-            secondSurnameRepre: "",
+            phoneClient: "",
             phoneRepre: "",
-            typeClient: 1
+            secondSurname: "",
+            secondSurnameRepre: "",
+            surname: "",
+            surnameRepre: "",
+            typeClient: 1,
 
         },
         validationSchema: yup.object().shape({
-            name: yup
-                .string()
-                .required("Campo obligatorio")
-                .min(3, "Minimo 2 caracteres"),
-            surname: yup
-                .string()
-                .required("Campo obligatorio")
-                .min(3, "Minimo 2 caracteres"),
-            secondSurname: yup
-                .string()
-                .required("Campo obligatorio")
-                .min(3, "Minimo 2 caracteres"),
-            phoneClient: yup
-                .number()
-                .required("Campo obligatorio")
-                .min(10, "Deben ser 10 digitos"),
-                
-            extension: yup
-                .number()
-                .required("Campo obligatorio")
-                .min(4, "Deben ser 4 digitos"),
-            emailClient: yup
-                .string()
-                .required("Campo obligatorio")
-                .min(3, "Minimo 2 caracteres"),
             company: yup
+                .string()
+                .required("Campo obligatorio")
+                .min(3, "Minimo 2 caracteres"),
+            emailClient: yup
                 .string()
                 .required("Campo obligatorio")
                 .min(3, "Minimo 2 caracteres"),
@@ -106,11 +85,27 @@ export const ClientList = ({ handleClose }) => {
                 .string()
                 .email("Ingresa un correo correcto")
                 .required("Campo obligatorio"),
+            extension: yup
+                .number()
+                .required("Campo obligatorio")
+                .min(4, "Deben ser 4 digitos"),
+            name: yup
+                .string()
+                .required("Campo obligatorio")
+                .min(3, "Minimo 2 caracteres"),
             nameRepre: yup
                 .string()
                 .required("Campo obligatorio")
                 .min(3, "Minimo 2 caracteres"),
-            surnameRepre: yup
+            phoneClient: yup
+                .number()
+                .required("Campo obligatorio")
+                .min(10, "Deben ser 10 digitos"),
+            phoneRepre: yup
+                .string()
+                .required("Campo obligatorio")
+                .min(10, "Deben ser 10 digitos"),
+            secondSurname: yup
                 .string()
                 .required("Campo obligatorio")
                 .min(3, "Minimo 2 caracteres"),
@@ -118,23 +113,27 @@ export const ClientList = ({ handleClose }) => {
                 .string()
                 .required("Campo obligatorio")
                 .min(3, "Minimo 2 caracteres"),
-            phoneRepre: yup
+            surname: yup
                 .string()
                 .required("Campo obligatorio")
-                .min(10, "Deben ser 10 digitos"),
+                .min(3, "Minimo 2 caracteres"),
+            surnameRepre: yup
+                .string()
+                .required("Campo obligatorio")
+                .min(3, "Minimo 2 caracteres"),
             typeClient: yup
                 .number()
                 .required("Campo obligatorio")
 
         }),
         onSubmit: (values) => {
-            const cliente = {
+            const cliente1 = {
                 ...values,
                 typeClient: {
                     id: parseInt(values.typeClient)
                 },
             };
-            console.log(cliente);
+            console.log(cliente1);
             Alert.fire({
                 title: titleConfirmacion,
                 text: msjConfirmacion,
@@ -150,7 +149,7 @@ export const ClientList = ({ handleClose }) => {
                     return axios({
                         url: "/client/",
                         method: "POST",
-                        data: JSON.stringify(cliente),
+                        data: JSON.stringify(cliente1),
                     })
                         .then((response) => {
                             console.log(response);
@@ -188,16 +187,9 @@ export const ClientList = ({ handleClose }) => {
         },
     });
 
-    // const cancelRegistration = () => {
-    //     formik.resetForm();
-    //     // setSubcategories([]);
-    //     handleClose();
-    // };
-
     const handleCloseForm = () => {
         formik.resetForm();
-        handleClose(false);
-
+        setIsOpen(false);
     };
 
 
@@ -238,7 +230,7 @@ export const ClientList = ({ handleClose }) => {
                         // setValues(row)
                         setValues({
                             ...row,
-                            "typeClient": row.typeClient.description
+                            "typeClient": row.typeClient.id
                         })
                         setIsOpenUpdate(true)
                     }}>
@@ -380,7 +372,7 @@ export const ClientList = ({ handleClose }) => {
                                                                     <Form.Group className="col-md-6 mb-4" >
                                                                         <Form.Label>Tipo de cliente</Form.Label>
                                                                         <Form.Select aria-label="" name="typeClient" value={formik.values.typeClient} onChange={formik.handleChange} >
-                                                                            <option>Seleccione una opción</option>
+                                                                            <option value="">Seleccione una opción</option>
                                                                             <option value="1">Interno</option>
                                                                             <option value="2">Externo</option>
                                                                         </Form.Select>
