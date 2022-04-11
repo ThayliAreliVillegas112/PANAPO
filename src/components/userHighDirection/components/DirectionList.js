@@ -35,11 +35,11 @@ export const DirectionList = () => {
     );
 
     const getDirectives = () => {
-        axios({ url: "/user/", method: "GET" })
+        axios({ url: "/person/", method: "GET" })
             .then((response) => {
                 let data = response.data;
                 console.log(data)
-                let directivesTemp = data.filter(item => item.rol?.authorities?.description === "Directivo")
+                let directivesTemp = data.filter(item => item.profession?.description === "Directivo")
                 console.log(directivesTemp)
 
                 setDirectives(directivesTemp); 
