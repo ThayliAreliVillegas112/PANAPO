@@ -361,3 +361,48 @@ export const PersonalList = () => {
         </div>
     )
 }
+
+
+// const getPerson = () => {
+//     axios({ url: "/person/", method: "GET" })
+//         .then((response) => {
+//             console.log(response);
+//             setPerson(response.data);
+//             setIsLoading(false);
+//         })
+//         .catch((error) => {
+//             console.log(error);
+//         });
+// };
+
+// const getUsers = () => {
+//     axios({ url: "/user/", method: "GET" })
+//         .then((response) => {
+//             console.log(response);
+//             setUsers(response.data);
+//             setIsLoading(false);
+//         })
+//         .catch((error) => {
+//             console.log(error);
+//         });
+// };
+
+// function result (){
+//     Select 
+// }
+
+// var s = new Set();
+// const fromDb = undefined;
+// var result = fromDb || [];
+// getUsers().forEach(function (e) {
+//     result.push(Object.assign({}, e));
+//     s.add(e.id);
+// });
+// getPerson().forEach(function (e) {
+//     if (!s.has(e.id)) {
+//         var temp = Object.assign({}, e);
+//         temp.position = null;
+//         result.push(temp);
+//     }
+// });
+// console.log("hola"+result);

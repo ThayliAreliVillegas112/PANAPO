@@ -14,10 +14,12 @@ export const ClientDetails = ({
   secondSurname,
   company,
   typeClient,
+  phoneClient,
+  extension,
   status
 }) => {
 
-    const [values, setValues] = useState({name: name, surname: surname, secondSurname:secondSurname, company: company, typeClient: typeClient, status: status});
+    const [values, setValues] = useState({name: name, surname: surname, secondSurname:secondSurname, company: company, typeClient: typeClient,phoneClient:phoneClient,extension: extension, status: status});
 
     const handleChange = (event) =>{
       const { name, value } = event.target;
@@ -85,9 +87,11 @@ export const ClientDetails = ({
         surname: surname,
         secondSurname: secondSurname,
         company: company,
-        typeClient: typeClient
+        typeClient: typeClient,
+        phoneClient: phoneClient,
+        extension: extension
       });
-    }, [name, surname, secondSurname, company, typeClient]);
+    }, [name, surname, secondSurname, company, typeClient, phoneClient, extension]);
   
     return (
       <>
@@ -147,6 +151,30 @@ export const ClientDetails = ({
                 name="typeClient"
                 placeholder="Nombre del proyecto"
                 value={values.typeClient}
+                // value={values.typeClient?.description}
+                onChange={handleChange}
+                readOnly
+              />
+              
+            </Form.Group>
+            <Form.Group className="col-md-6 topBottom">
+              <Form.Label className="form-label">Teléfono</Form.Label>
+              <Form.Control
+                name="phoneClient"
+                placeholder="Nombre del proyecto"
+                value={values.phoneClient}
+                // value={values.typeClient?.description}
+                onChange={handleChange}
+                readOnly
+              />
+              
+            </Form.Group>
+            <Form.Group className="col-md-6 topBottom">
+              <Form.Label className="form-label">Extensión</Form.Label>
+              <Form.Control
+                name="extension"
+                placeholder="Nombre del proyecto"
+                value={values.extension}
                 // value={values.typeClient?.description}
                 onChange={handleChange}
                 readOnly

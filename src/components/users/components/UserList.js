@@ -1,22 +1,19 @@
 import React, { useState, useEffect } from "react";
 import FeatherIcon from "feather-icons-react";
 import { useNavigate } from "react-router-dom";
-import {
-    Button,
-    Card,
-    Col,
-    Collapse,
-    Container,
-    Form,
-    Row
-} from "react-bootstrap";
+import {Button,Card,Col,Collapse,Container,Form,Row} from "react-bootstrap";
 import DataTable from "react-data-table-component";
+import { Formik, useFormik } from "formik";
+import * as yup from "yup";
+import axios from "../../../shared/plugins/axios";
 import { FilterComponent } from "../../../shared/components/FilterComponent";
 import { CustomLoader } from "../../../shared/components/CustomLoader";
 import { UserEdit } from "./UserEdit";
 import { UserDetails } from "./UserDetails";
+import Alert, { msjConfirmacion, titleConfirmacion, titleError, msjError, msjExito, titleExito } from "../../../shared/plugins/alert";
 
-export const UserList = () => {
+
+export const UserList = ({ handleClose }) => {
 
     let value = "";
 
@@ -26,6 +23,7 @@ export const UserList = () => {
     const [isLoading, setIsLoading] = useState(false);
 
     const [users, setUsers] = useState([]);
+    const [person, setPerson] = useState([]);
     const [values, setValues] = useState({});
 
     const [isOpen, setIsOpen] = useState(false);
@@ -39,6 +37,7 @@ export const UserList = () => {
 
     useEffect(() => {
         setIsLoading(true);
+        document.title = "PANAPO | Gestión de usuarios";
         getUser();
     }, []);
 
@@ -117,38 +116,32 @@ export const UserList = () => {
         },
     ];
 
-    let user = [
-        {
-            "name": "Emmanuel",
-            "surname": "Herrera",
-            "lastname": "Ibarra",
-            "id": 134,
-        },
-        {
-            "name": "Thayli",
-            "surname": "Villegas",
-            "lastname": "García",
-            "id": 135,
-        },
-        {
-            "name": "Roy",
-            "surname": "Salgado",
-            "lastname": "Martínez",
-            "id": 136,
-        },
-        {
-            "name": "Miriam",
-            "surname": "Saucedo",
-            "lastname": "Bustamante",
-            "id": 137,
-        },
-    ];
+    const getPerson = () => {
+        axios({ url: "/person/", method: "GET" })
+            .then((response) => {
+                console.log(response);
 
-    const getUser = () => {
-        setUsers(users);
-        setIsLoading(false);
+                setPerson(response.data);
+                setIsLoading(false);
+            })
+            .catch((error) => {
+                console.log(error);
+            });
     };
 
+    const getUser = () => {
+        axios({ url: "/user/", method: "GET" })
+            .then((response) => {
+                console.log(response);
+                setUsers(response.data);
+                setIsLoading(false);
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    };
+
+   
     const paginationOptions = {
         rowsPerPageText: "Filas por página",
         rangeSeparatorText: "de",
@@ -168,6 +161,86 @@ export const UserList = () => {
             />
         );
     }, [filterText]);
+
+    const formik = useFormik({
+        initialValues: {
+            
+            typeClient: 1
+
+        },
+        validationSchema: yup.object().shape({
+           
+            typeClient: yup
+                .number()
+                .required("Campo obligatorio")
+
+        }),
+        onSubmit: (values) => {
+            const cliente = {
+                ...values,
+                typeClient: {
+                    id: parseInt(values.typeClient)
+                },
+            };
+            console.log(cliente);
+            Alert.fire({
+                title: titleConfirmacion,
+                text: msjConfirmacion,
+                confirmButtonText: "Aceptar",
+                cancelButtonText: "Cancelar",
+                confirmButtonColor: "#198754",
+                cancelButtonColor: "#dc3545",
+                showCancelButton: true,
+                reverseButtons: true,
+                showLoaderOnConfirm: true,
+                icon: "warning",
+                preConfirm: () => {
+                    return axios({
+                        url: "/client/",
+                        method: "POST",
+                        data: JSON.stringify(cliente),
+                    })
+                        .then((response) => {
+                            console.log(response);
+                            if (!response.error) {
+                                // getClients();
+
+                                Alert.fire({
+                                    title: titleExito,
+                                    text: msjExito,
+                                    confirmButtonColor: "#198754",
+                                    icon: "success",
+                                    confirmButtonText: "Aceptar",
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        handleCloseForm();
+                                    }
+                                });
+                            }
+                            return response;
+                        })
+                        .catch((error) => {
+                            console.log(error);
+                            Alert.fire({
+                                title: titleError,
+                                text: msjError,
+                                cancelButtonColor: "#198754",
+                                icon: "error",
+                                confirmButtonText: "Aceptar",
+                            });
+                        });
+                },
+                backdrop: true,
+                allowOutsideClick: !Alert.isLoading,
+            });
+        },
+    });
+
+    const handleCloseForm = () => {
+        formik.resetForm();
+        handleClose(false);
+        
+    };
 
     return (
         <div className="content-wrapper screenHeight">
@@ -258,7 +331,7 @@ export const UserList = () => {
                             <Card.Body>
                                 <DataTable
                                     columns={columns}
-                                    data={user}
+                                    data={users}
                                     pagination
                                     paginationComponentOptions={paginationOptions}
                                     progressPending={isLoading}

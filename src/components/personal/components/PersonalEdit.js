@@ -15,6 +15,7 @@ export const PersonalEdit = ({
     isOpenUpdate,
     handleClose,
     setPersonal,
+    getPersonal,
     id,
     name,
     surname,
@@ -34,7 +35,7 @@ export const PersonalEdit = ({
         dateBirth: dateBirth,
         phone: phone,
         profession: profession,
-        status: status,
+        status: status
     });
 
     const handleChange = (event) => {
@@ -44,7 +45,16 @@ export const PersonalEdit = ({
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        console.log(values);
+        const person = {
+            ...values,
+            profession: {
+                id: parseInt(values.profession)
+            },
+            status: {
+                id: parseInt(values.status)
+            }
+        };
+        console.log(person);
         Alert.fire({
             title: titleConfirmacion,
             text: msjConfirmacion,
@@ -58,16 +68,13 @@ export const PersonalEdit = ({
                 return axios({
                     url: "/person/",
                     method: "PUT",
-                    data: JSON.stringify(values),
+                    data: JSON.stringify(person),
                 })
                     .then((response) => {
                         console.log(response);
                         if (!response.error) {
-                            setPersonal((personal) => [
-                                ...personal.filter((it) => it.id !== values.id),
-                                values,
-                            ]);
                             handleCloseForm();
+                            getPersonal();
                             Alert.fire({
                                 title: titleExito,
                                 text: msjExito,
@@ -93,13 +100,14 @@ export const PersonalEdit = ({
     };
 
     const handleCloseForm = () => {
-        handleClose();
+        handleClose(false);
         setValues({});
     };
 
     useEffect(() => {
         setValues({
             id: id,
+            status: status,
             name: name,
             surname: surname,
             secondSurname: secondSurname,
@@ -107,9 +115,8 @@ export const PersonalEdit = ({
             dateBirth: dateBirth,
             phone: phone,
             profession: profession,
-            status: status,
         });
-    }, [id, name, surname, secondSurname, email, dateBirth, phone, profession, status]);
+    }, [id, status, name, surname, secondSurname, email, dateBirth, phone, profession]);
 
     return (
         <>
@@ -123,7 +130,7 @@ export const PersonalEdit = ({
                 </Modal.Header>
                 <Modal.Body>
                     <Form className="row" onSubmit={handleSubmit}>
-                        <Form.Group className="col-md-4">
+                        <Form.Group className="col-md-4 mb-4">
                             <Form.Label className="form-label">Nombre</Form.Label>
                             <Form.Control
                                 name="name"
@@ -134,7 +141,7 @@ export const PersonalEdit = ({
                                      <span className="error-text">{formik.errors.description}</span>
                                  ) : null} */}
                         </Form.Group>
-                        <Form.Group className="col-md-4">
+                        <Form.Group className="col-md-4 mb-4">
                             <Form.Label className="form-label">Primer apellido</Form.Label>
                             <Form.Control
                                 name="surname"
@@ -143,7 +150,7 @@ export const PersonalEdit = ({
                             />
                         </Form.Group>
 
-                        <Form.Group className="col-md-4">
+                        <Form.Group className="col-md-4 mb-4">
                             <Form.Label className="form-label">Segundo apellido</Form.Label>
                             <Form.Control
                                 name="secondSurname"
@@ -151,7 +158,7 @@ export const PersonalEdit = ({
                                 onChange={handleChange}
                             />
                         </Form.Group>
-                        <Form.Group className="col-md-6 topBottom">
+                        <Form.Group className="col-md-6 mb-4">
                             <Form.Label className="form-label">Fecha de nacimiento</Form.Label>
                             <Form.Control
                                 type="date"
@@ -160,7 +167,7 @@ export const PersonalEdit = ({
                                 onChange={handleChange}
                             />
                         </Form.Group>
-                        <Form.Group className="col-md-6 topBottom">
+                        <Form.Group className="col-md-6 mb-4">
                             <Form.Label>Teléfono</Form.Label>
                             <Form.Control
                                 type="tel"
@@ -169,15 +176,26 @@ export const PersonalEdit = ({
                                 onChange={handleChange}
                             />
                         </Form.Group>
-                        <Form.Group className="col-md-6 topBottom">
+                        <Form.Group className="col-md-6 mb-4">
                             <Form.Label>Rol</Form.Label>
-                            <Form.Select aria-label="Seleccionar una opción" name="profession">
-                                <option>Seleccione una opción</option>
-                                <option value="1">Docente</option>
-                                <option value="2">Becario</option>
+                            <Form.Select aria-label="Seleccionar una opción"
+                                value={values.profession} onChange={handleChange} name="profession">
+                                {
+                                    values.profession === "1" ? (
+                                        <>
+                                            <option value="1">Docente</option>
+                                            <option value="2">Becario</option>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <option value="2">Becario</option>
+                                            <option value="1">Docente</option>
+                                        </>
+                                    )
+                                }
                             </Form.Select>
                         </Form.Group>
-                        <Form.Group className="mb-4 topBottom">
+                        <Form.Group className="mb-4 mt-3">
                             <Row>
                                 <Col className="text-end">
                                     <Button
@@ -204,4 +222,3 @@ export const PersonalEdit = ({
         </>
     );
 };
-

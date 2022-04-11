@@ -8,6 +8,7 @@ export const RoleEdit = ({
   isOpenUpdate,
   handleClose,
   setRoles,
+  getRoles,
   id,
   acronym,
   description,
@@ -20,60 +21,61 @@ export const RoleEdit = ({
     status: status
    });
 
-  // const handleChange = (event) =>{
-  //   const { name, value } = event.target;
-  //   setValues({ ...values, [name]: value});
-  // }  
+  const handleChange = (event) =>{
+    const { name, value } = event.target;
+    setValues({ ...values, [name]: value});
+  }  
 
-  // const handleSubmit = (event) =>{
-  //   event.preventDefault();
-  //   console.log(values);
-  //   Alert.fire({
-  //   title: titleConfirmacion,
-  //   text: msjConfirmacion,
-  //   confirmButtonText: "Aceptar",
-  //   cancelButtonText: "Cancelar",
-  //   showCancelButton: true,
-  //   reverseButtons: true,
-  //   showLoaderOnConfirm: true,
-  //   icon: "warning",
-  //   preConfirm: () => {
-  //     return axios({
-  //       url: "/category/",
-  //       method: "PUT",
-  //       data: JSON.stringify(values),
-  //     })
-  //       .then((response) => {
-  //         console.log(response);
-  //         if (!response.error) {
-  //           setCategories((categories) => [
-  //             ...categories.filter((it) => it.id !== values.id),
-  //             values,
-  //           ]);
-  //           handleCloseForm();
-  //           Alert.fire({
-  //             title: titleExito,
-  //             text: msjExito,
-  //             icon: "success",
-  //             confirmButtonText: "Aceptar",
-  //           });
-  //         }
-  //         return response;
-  //       })
-  //       .catch((error) => {
-  //         Alert.fire({
-  //           title: titleError,
-  //           confirmButtonColor: "#198754",
-  //           text: msjError,
-  //           icon: "error",
-  //           confirmButtonText: "Aceptar",
-  //         });
-  //       });
-  //   },
-  //   backdrop: true,
-  //   allowOutsideClick: !Alert.isLoading,
-  //   });
-  // };
+  const handleSubmit = (event) =>{
+    event.preventDefault();
+    
+    const rol ={
+      ...values
+    }
+    console.log(rol);
+    Alert.fire({
+    title: titleConfirmacion,
+    text: msjConfirmacion,
+    confirmButtonText: "Aceptar",
+    cancelButtonText: "Cancelar",
+    showCancelButton: true,
+    reverseButtons: true,
+    showLoaderOnConfirm: true,
+    icon: "warning",
+    preConfirm: () => {
+      return axios({
+        url: "/rol/",
+        method: "PUT",
+        data: JSON.stringify(rol),
+      })
+        .then((response) => {
+          console.log(response);
+          if (!response.error) {
+            handleCloseForm();
+            getRoles();
+            Alert.fire({
+              title: titleExito,
+              text: msjExito,
+              icon: "success",
+              confirmButtonText: "Aceptar",
+            });
+          }
+          return response;
+        })
+        .catch((error) => {
+          Alert.fire({
+            title: titleError,
+            confirmButtonColor: "#198754",
+            text: msjError,
+            icon: "error",
+            confirmButtonText: "Aceptar",
+          });
+        });
+    },
+    backdrop: true,
+    allowOutsideClick: !Alert.isLoading,
+    });
+  };
 
   const handleCloseForm = () => {
     handleClose();
@@ -94,10 +96,10 @@ export const RoleEdit = ({
           <Modal.Title>Modificar rol</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
+          <Form onSubmit={handleSubmit}>
             <Form.Group className="col-md-12" >
               <Form.Label>Nombre</Form.Label>
-              <Form.Control type="text" placeholder="María" value={values.description} />
+              <Form.Control type="text" placeholder="" value={values.description} onChange={handleChange}/>
             </Form.Group>
             <Form.Group className="mb-4">
               <Row className="topBottom">

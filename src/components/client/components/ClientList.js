@@ -61,6 +61,7 @@ export const ClientList = ({ handleClose }) => {
             surname: "",
             secondSurname: "",
             phoneClient: "",
+            extension: "",
             emailClient: "",
             company: "",
             emailRepre: "",
@@ -85,10 +86,14 @@ export const ClientList = ({ handleClose }) => {
                 .required("Campo obligatorio")
                 .min(3, "Minimo 2 caracteres"),
             phoneClient: yup
-                .string()
+                .number()
                 .required("Campo obligatorio")
-                .min(10, "Deben ser 10 digitos")
-                .max(10, "No pueden ser más de 10 digitos"),
+                .min(10, "Deben ser 10 digitos"),
+                
+            extension: yup
+                .number()
+                .required("Campo obligatorio")
+                .min(4, "Deben ser 4 digitos"),
             emailClient: yup
                 .string()
                 .required("Campo obligatorio")
@@ -192,7 +197,7 @@ export const ClientList = ({ handleClose }) => {
     const handleCloseForm = () => {
         formik.resetForm();
         handleClose(false);
-        
+
     };
 
 
@@ -215,7 +220,8 @@ export const ClientList = ({ handleClose }) => {
                 <Button variant="primary" size="md"
                     onClick={() => {
                         // setValues(row)
-                        setValues({...row,
+                        setValues({
+                            ...row,
                             "typeClient": row.typeClient.description
                         })
                         setIsOpenDetails(true)
@@ -230,7 +236,8 @@ export const ClientList = ({ handleClose }) => {
                 <Button variant="warning" size="md"
                     onClick={() => {
                         // setValues(row)
-                        setValues({...row,
+                        setValues({
+                            ...row,
                             "typeClient": row.typeClient.description
                         })
                         setIsOpenUpdate(true)
@@ -351,9 +358,16 @@ export const ClientList = ({ handleClose }) => {
                                                                     </Form.Group>
                                                                     <Form.Group className="col-md-6 mb-4" >
                                                                         <Form.Label>Teléfono</Form.Label>
-                                                                        <Form.Control name="phoneClient" value={formik.values.phoneClient} onChange={formik.handleChange} type="tel" placeholder="Ejemplo: Díaz" />
+                                                                        <Form.Control name="phoneClient" value={formik.values.phoneClient} onChange={formik.handleChange} type="tel" placeholder="7771265498" />
                                                                         {formik.errors.phoneClient ? (
                                                                             <span className="error-text">{formik.errors.phoneClient}</span>
+                                                                        ) : null}
+                                                                    </Form.Group>
+                                                                    <Form.Group className="col-md-6 mb-4" >
+                                                                        <Form.Label>Extensión</Form.Label>
+                                                                        <Form.Control name="extension" value={formik.values.extension} onChange={formik.handleChange} type="tel" />
+                                                                        {formik.errors.extension ? (
+                                                                            <span className="error-text">{formik.errors.extension}</span>
                                                                         ) : null}
                                                                     </Form.Group>
                                                                     <Form.Group className="col-md-6 mb-4" >
@@ -495,7 +509,7 @@ export const ClientList = ({ handleClose }) => {
                                 <ClientDetails
                                     isOpenDetails={isOpenDetails}
                                     handleClose={setIsOpenDetails}
-                                    
+
                                     {...values}
                                 />
                             </Card.Body>
