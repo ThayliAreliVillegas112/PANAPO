@@ -24,22 +24,20 @@ export const PersonalList = () => {
     const [isOpenDetails, setIsOpenDetails] = useState(false);
 
     const filteredItems = personal.filter(
-        (item) => item.name && item.name.toLowerCase().includes(filterText.toLowerCase()) || 
+        (item) => item.name && item.name.toLowerCase().includes(filterText.toLowerCase()) ||
             item.surname && item.surname.toLowerCase().includes(filterText.toLowerCase()) ||
             item.secondSurname && item.secondSurname.toLowerCase().includes(filterText.toLowerCase())
     );
 
     //Obtener todos los registros
     const getPersonal = () => {
-        axios({ url: "/person/", method: "GET"})
+        axios({ url: "/person/", method: "GET" })
             .then((response) => {
                 //filtrar que no aparezcan los directivos
                 let data = response.data;
                 let personalTemp = data.filter(item => item.profession.description != "Directivo")
-
-                
-
                 setPersonal(personalTemp);
+                console.log(personalTemp)
                 setIsLoading(false);
             })
             .catch((error) => {
@@ -134,6 +132,66 @@ export const PersonalList = () => {
         getPersonal();
     }, []);
 
+    const statusChange = (personal) => {
+        Alert.fire({
+          title: titleConfirmacion,
+          text: msjConfirmacion,
+          confirmButtonText: "Aceptar",
+          cancelButtonText: "Cancelar",
+          confirmButtonColor: "#198754",
+          cancelButtonColor: "#dc3545",
+          showCancelButton: true,
+          reverseButtons: true,
+          showLoaderOnConfirm: true,
+          icon: "warning",
+          backdrop: true,
+          allowOutsideClick: !Alert.isLoading,
+          preConfirm: () => {
+            let personalUpdate = {};
+            if (personal.status.description === 'Activo') {
+                personalUpdate = {
+                ...personal,
+                status: { id: 2, description: "Inactivo" }
+              };
+            } else {
+                personalUpdate = {
+                ...personal,
+                status: { id: 1, description: "Activo" }
+              };
+            }
+            return axios({
+              url: "/person/",
+              method: 'PUT',
+              data: JSON.stringify(personalUpdate)
+            })
+              .then((response => {
+                if (!response.error) { 
+                  getPersonal();
+                  Alert.fire({
+                    title: titleExito,
+                    text: msjExito,
+                    icon: "success",
+                    confirmButtonText: "Aceptar",
+                    confirmButtonColor: "#198754",
+                  });
+                } else {
+                  Alert.fire({
+                    title: titleError,
+                    text: msjError,
+                    icon: "error",
+                    confirmButtonText: "Aceptar",
+                    confirmButtonColor: "#198754",
+                  });
+                }
+                return response;
+              }))
+              .catch((error) => {
+                console.log(error);
+              })
+          }
+        });
+      }
+
     const columns = [
         {
             name: <h6>#</h6>,
@@ -148,27 +206,34 @@ export const PersonalList = () => {
             name: <h6>Correo</h6>,
             cell: (row) => <div className="txt4">{row.email}</div>,
         },
+        ,
+        {
+            name: <h6>Rol</h6>,
+            cell: (row) => <div className="txt4">{row.profession.description}</div>,
+        },
         {
             name: <div><h6>Detalles</h6></div>,
             cell: (row) => <div>
                 <Button variant="primary" size="md"
                     onClick={() => {
-                        setValues({...row,
+                        setValues({
+                            ...row,
                             "profession": row.profession.description
                         })
                         setIsOpenDetails(true)
                     }}>
                     <FeatherIcon icon="info" />
                 </Button>
-            </div> 
+            </div>
         },
         {
             name: <div><h6>Modificar</h6></div>,
             cell: (row) => <div>
                 <Button variant="warning" size="md"
                     onClick={() => {
-                        setValues({...row,
-                            "profession": row.profession.description
+                        setValues({
+                            ...row,
+                            "profession": row.profession.id, "status": row.status.id
                         })
                         setIsOpenUpdate(true)
                     }}>
@@ -177,14 +242,19 @@ export const PersonalList = () => {
             </div>
         },
         {
-            name: <div><h6>Desactivar</h6></div>,
+            name: <div><h6>Cambiar estado</h6></div>,
             cell: (row) => <div>
-                <Button variant="danger" size="md"
-                    onClick={() => {
-                        setValues(row)
-                    }}>
-                    <FeatherIcon icon="slash" />
-                </Button>
+                {row.status.description === "Activo" ? (
+                    <Button variant="danger" size="md"
+                        onClick={() => statusChange(row)}>
+                        <FeatherIcon icon="slash" />
+                    </Button>
+                ) : (
+                    <Button variant="success" size="md"
+                        onClick={() => statusChange(row)}>
+                        <FeatherIcon icon="check-circle" />
+                    </Button>
+                )}
             </div>
 
         }
@@ -344,8 +414,9 @@ export const PersonalList = () => {
                                 />
                                 <PersonalEdit
                                     isOpenUpdate={isOpenUpdate}
-                                    handleClose={() => setIsOpenUpdate(false)}
+                                    handleClose={setIsOpenUpdate}
                                     setPersonal={setPersonal}
+                                    getPersonal={getPersonal}
                                     {...values}
                                 />
                                 <PersonalDetails
@@ -361,48 +432,3 @@ export const PersonalList = () => {
         </div>
     )
 }
-
-
-// const getPerson = () => {
-//     axios({ url: "/person/", method: "GET" })
-//         .then((response) => {
-//             console.log(response);
-//             setPerson(response.data);
-//             setIsLoading(false);
-//         })
-//         .catch((error) => {
-//             console.log(error);
-//         });
-// };
-
-// const getUsers = () => {
-//     axios({ url: "/user/", method: "GET" })
-//         .then((response) => {
-//             console.log(response);
-//             setUsers(response.data);
-//             setIsLoading(false);
-//         })
-//         .catch((error) => {
-//             console.log(error);
-//         });
-// };
-
-// function result (){
-//     Select 
-// }
-
-// var s = new Set();
-// const fromDb = undefined;
-// var result = fromDb || [];
-// getUsers().forEach(function (e) {
-//     result.push(Object.assign({}, e));
-//     s.add(e.id);
-// });
-// getPerson().forEach(function (e) {
-//     if (!s.has(e.id)) {
-//         var temp = Object.assign({}, e);
-//         temp.position = null;
-//         result.push(temp);
-//     }
-// });
-// console.log("hola"+result);

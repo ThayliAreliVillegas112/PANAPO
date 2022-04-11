@@ -16,8 +16,9 @@ export const RoleEdit = ({
 }) => {
 
   const [values, setValues] = useState({ 
-    description: description, 
+    id: id,
     acronym: acronym, 
+    description: description, 
     status: status
    });
 
@@ -78,16 +79,18 @@ export const RoleEdit = ({
   };
 
   const handleCloseForm = () => {
-    handleClose();
+    handleClose(false);
     setValues({});
   };
 
   useEffect(() => {
     setValues({
+      id: id,
+      status: status,
       acronym: acronym,
       description: description
     });
-  }, [acronym, description]);
+  }, [id, status, acronym, description]);
 
   return (
     <>
@@ -98,8 +101,8 @@ export const RoleEdit = ({
         <Modal.Body>
           <Form onSubmit={handleSubmit}>
             <Form.Group className="col-md-12" >
-              <Form.Label>Nombre</Form.Label>
-              <Form.Control type="text" placeholder="" value={values.description} onChange={handleChange}/>
+              <Form.Label>Description</Form.Label>
+              <Form.Control name="description" type="text" placeholder="" value={values.description} onChange={handleChange}/>
             </Form.Group>
             <Form.Group className="mb-4">
               <Row className="topBottom">

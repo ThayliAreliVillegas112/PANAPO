@@ -12,11 +12,12 @@ import Alert, { msjConfirmacion, titleConfirmacion, titleError, msjError, msjExi
 import main from "../../../assets/css/main.css";
 
 
-export const RoleList = ({ handleClose }) => {
+export const RoleList = () => {
+    const [roles, setRoles] = useState([]);
     const [filterText, setFilterText] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
-    const [roles, setRoles] = useState([]);
+    
     const [values, setValues] = useState({});
     const [isOpenUpdate, setIsOpenUpdate] = useState(false);
 
@@ -83,8 +84,7 @@ export const RoleList = ({ handleClose }) => {
                             console.log(response);
                             if (!response.error) {
                                 getRoles();
-                                // setRoles(roles => [...roles, response.data])
-                                // handleCloseForm();
+                               
                                 Alert.fire({
                                     title: titleExito,
                                     text: msjExito,
@@ -94,7 +94,7 @@ export const RoleList = ({ handleClose }) => {
                                 }).then((result) => {
                                     if (result.isConfirmed) {
                                         handleCloseForm();
-                                        // cancelRegistration();
+                                        
                                     }
                                 });
                             }
@@ -117,16 +117,11 @@ export const RoleList = ({ handleClose }) => {
         },
     });
 
-    const cancelRegistration = () => {
-        formik.resetForm();
-        // setSubcategories([]);
-        handleClose();
-    };
 
-    const handleCloseForm = () =>{
+    const handleCloseForm = () => {
         formik.resetForm();
-        // handleClose();
-      };
+        setIsOpen(false);
+    };
 
     const columns = [
         {
@@ -262,9 +257,10 @@ export const RoleList = ({ handleClose }) => {
                             />
                             <RoleEdit
                                 isOpenUpdate={isOpenUpdate}
-                                handleClose={() => setIsOpenUpdate(false)}
+                                handleClose={setIsOpenUpdate}
                                 setRoles={setRoles}
-                            {...values}
+                                getRoles={getRoles}
+                                {...values}
                             />
                         </Card.Body>
                     </Card>
