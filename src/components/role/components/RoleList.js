@@ -210,14 +210,14 @@ export const RoleList = () => {
                                             <Form.Label>Acrónimo</Form.Label>
                                             <Form.Control name="acronym" value={formik.values.acronym} onChange={formik.handleChange} type="text" placeholder="Ejemplo: Maria" />
                                             {formik.errors.acronym ? (
-                                                <span className="error-text">{formik.errors.acronym}</span>
+                                                <span className="text-danger">{formik.errors.acronym}</span>
                                             ) : null}
                                         </Form.Group>
                                         <Form.Group className="col-md-6" >
                                             <Form.Label>Nombre completo</Form.Label>
                                             <Form.Control name="description" value={formik.values.description} onChange={formik.handleChange} type="text" placeholder="Ejemplo: Maria" />
                                             {formik.errors.description ? (
-                                                <span className="error-text">{formik.errors.description}</span>
+                                                <span className="text-danger">{formik.errors.description}</span>
                                             ) : null}
                                         </Form.Group>
                                         <br />
