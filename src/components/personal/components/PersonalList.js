@@ -37,7 +37,6 @@ export const PersonalList = () => {
                 let data = response.data;
                 let personalTemp = data.filter(item => item.profession.description != "Directivo")
                 setPersonal(personalTemp);
-                console.log(personalTemp)
                 setIsLoading(false);
             })
             .catch((error) => {
@@ -72,7 +71,6 @@ export const PersonalList = () => {
                     id: parseInt(values.profession)
                 },
             };
-            console.log(person)
             Alert.fire({
                 title: titleConfirmacion,
                 text: msjConfirmacion,
@@ -87,10 +85,7 @@ export const PersonalList = () => {
                 preConfirm: () => {
                     return axios({ url: "/person/", method: "POST", data: JSON.stringify(person) })
                         .then((response) => {
-                            console.log(response)
                             if (!response.error) {
-                                // ... significa agregar un objeto a una lista
-                                //setPersonal(personal => [...personal, response.data])
                                 getPersonal();
                                 Alert.fire({
                                     title: titleExito,
@@ -196,20 +191,23 @@ export const PersonalList = () => {
         {
             name: <h6>#</h6>,
             cell: (row, index) => <div><h6>{index + 1}</h6></div>,
-            width: "4%"
+            width: "5%"
         },
         {
             name: <h6>Nombre</h6>,
             cell: (row) => <div className="txt4">{row.name + " "} {row.surname + " "} {row.secondSurname}</div>,
+            width: "25%"
         },
         {
             name: <h6>Correo</h6>,
             cell: (row) => <div className="txt4">{row.email}</div>,
+            width: "25%"
         },
         ,
         {
             name: <h6>Rol</h6>,
             cell: (row) => <div className="txt4">{row.profession.description}</div>,
+            width: "10%"
         },
         {
             name: <div><h6>Detalles</h6></div>,
@@ -277,11 +275,11 @@ export const PersonalList = () => {
     return (
         <div className="content-wrapper screenHeight">
             <Container fluid>
-                <section class="content-header">
-                    <div class="container-fluid">
-                        <div class="row mb-2">
-                            <div class="col-sm-6">
-                                <h1 class="font-weight-bold">Gestión de personal</h1>
+                <section className="content-header">
+                    <div className="container-fluid">
+                        <div className="row mb-2">
+                            <div className="col-sm-6">
+                                <h1 className="font-weight-bold">Gestión de personal</h1>
                             </div>
                         </div>
                     </div>
@@ -320,7 +318,7 @@ export const PersonalList = () => {
                                                 <Form.Control type="text" name="name" value={formik.values.name}
                                                     onChange={formik.handleChange} />
                                                 {formik.errors.name ? (
-                                                    <span className='error-text'>{formik.errors.name}</span>
+                                                    <span className='text-danger'>{formik.errors.name}</span>
                                                 ) : null}
                                             </Form.Group>
                                             <Form.Group className="col-md-4" >
@@ -328,7 +326,7 @@ export const PersonalList = () => {
                                                 <Form.Control type="text" name="surname" value={formik.values.surname}
                                                     onChange={formik.handleChange} />
                                                 {formik.errors.surname ? (
-                                                    <span className='error-text'>{formik.errors.surname}</span>
+                                                    <span className='text-danger'>{formik.errors.surname}</span>
                                                 ) : null}
                                             </Form.Group>
                                             <Form.Group className="col-md-4" >
@@ -336,7 +334,7 @@ export const PersonalList = () => {
                                                 <Form.Control type="text" name="secondSurname" value={formik.values.secondSurname}
                                                     onChange={formik.handleChange} />
                                                 {formik.errors.secondSurname ? (
-                                                    <span className='error-text'>{formik.errors.secondSurname}</span>
+                                                    <span className='text-danger'>{formik.errors.secondSurname}</span>
                                                 ) : null}
                                             </Form.Group>
                                             <Form.Group className="col-md-6" >
@@ -344,7 +342,7 @@ export const PersonalList = () => {
                                                 <Form.Control type="date" name="dateBirth" value={formik.values.dateBirth}
                                                     onChange={formik.handleChange} />
                                                 {formik.errors.dateBirth ? (
-                                                    <span className='error-text'>{formik.errors.dateBirth}</span>
+                                                    <span className='text-danger'>{formik.errors.dateBirth}</span>
                                                 ) : null}
                                             </Form.Group>
                                             <Form.Group className="col-md-6 mb-4" >
@@ -352,7 +350,7 @@ export const PersonalList = () => {
                                                 <Form.Control type="email" name="email" value={formik.values.email}
                                                     onChange={formik.handleChange} />
                                                 {formik.errors.email ? (
-                                                    <span className='error-text'>{formik.errors.email}</span>
+                                                    <span className='text-danger'>{formik.errors.email}</span>
                                                 ) : null}
                                             </Form.Group>
                                             <Form.Group className="col-md-6 mb-4" >
@@ -360,7 +358,7 @@ export const PersonalList = () => {
                                                 <Form.Control type="tel" name="phone" value={formik.values.phone}
                                                     onChange={formik.handleChange} />
                                                 {formik.errors.phone ? (
-                                                    <span className='error-text'>{formik.errors.phone}</span>
+                                                    <span className='text-danger'>{formik.errors.phone}</span>
                                                 ) : null}
                                             </Form.Group>
                                             <Form.Group className="col-md-6 mb-4" >
@@ -368,13 +366,12 @@ export const PersonalList = () => {
                                                 <Form.Select aria-label="Seleccionar rol" name="profession"
                                                     value={formik.values.profession}
                                                     onChange={formik.handleChange}>
-
                                                     <option value="">Seleccione una opción</option>
                                                     <option value="1">Docente</option>
                                                     <option value="2">Becario</option>
                                                 </Form.Select>
                                                 {formik.errors.profession ? (
-                                                    <span className='error-text'>{formik.errors.profession}</span>
+                                                    <span className='text-danger'>{formik.errors.profession}</span>
                                                 ) : null}
                                             </Form.Group>
                                             <div className="d-grid gap-2">
@@ -382,7 +379,6 @@ export const PersonalList = () => {
                                                     disabled={!(formik.isValid && formik.dirty)}>
                                                     Registrar
                                                 </Button>
-                                                {/* <Button type="submit" className="button-style" size="lg">Registrar</Button> */}
                                             </div>
                                         </Form>
                                     </Card.Body>

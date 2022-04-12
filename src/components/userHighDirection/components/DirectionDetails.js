@@ -14,26 +14,32 @@ import axios from "../../../shared/plugins/axios";
 export const DirectionDetails = ({
   isOpenDetails,
   handleClose,
-  setDirective,
   name,
   surname,
-  lastname,
-  status,
+  secondSurname,
+  username
 }) => {
-  const [values, setValues] = useState({ name: name, surname: surname, lastname: lastname });
+  
+  const [values, setValues] = useState({ name: name, surname: surname, secondSurname: secondSurname, username: username});
 
   const handleCloseForm = () => {
-    handleClose();
+    handleClose(false);
     setValues({});
   };
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setValues({ ...values, [name]: value });
+}
 
   useEffect(() => {
     setValues({
       name: name,
       surname: surname,
-      lastname: lastname
+      secondSurname: secondSurname,
+      username: username,
     });
-  }, [name, surname, lastname]);
+  }, [isOpenDetails]);
 
   return (
     <>
@@ -47,43 +53,43 @@ export const DirectionDetails = ({
         </Modal.Header>
         <Modal.Body>
           <Form className="row">
-            <Form.Group className="col-md-6">
+            <Form.Group className="col-md-6 mb-4">
               <Form.Label className="form-label">Nombre</Form.Label>
               <Form.Control
                 name="name"
-                placeholder="María"
                 value={values.name}
+                onChange={handleChange}
                 readOnly
               />
             </Form.Group>
-            <Form.Group className="col-md-6">
+            <Form.Group className="col-md-6 mb-4">
               <Form.Label className="form-label">Primer apellido</Form.Label>
               <Form.Control
-                name="name"
-                placeholder="Solis"
+                name="surname"
                 value={values.surname}
+                onChange={handleChange}
                 readOnly
               />
             </Form.Group>
-            <Form.Group className="col-md-6 topBottom2">
+            <Form.Group className="col-md-6 mb-4">
               <Form.Label className="form-label">Segundo apellido</Form.Label>
               <Form.Control
-                name="name"
-                placeholder="Bustamante"
-                value={values.lastname}
+                name="secondSurname"
+                value={values.secondSurname}
+                onChange={handleChange}
                 readOnly
               />
             </Form.Group>
-            <Form.Group className="col-md-6 topBottom2">
+            <Form.Group className="col-md-6 mb-4">
               <Form.Label className="form-label">Correo</Form.Label>
               <Form.Control
-                name="name"
-                placeholder="ejemplo@gmail.com"
-               
+                name="username"
+                value={values.username}
+                onChange={handleChange}
                 readOnly
               />
             </Form.Group>
-            <Form.Group className="mb-4 topBottom">
+            <Form.Group className="mb-4 mt-3">
               <Row>
                 <Col className="text-end">
                   <Button

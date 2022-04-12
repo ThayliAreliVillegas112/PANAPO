@@ -31,18 +31,17 @@ export const DirectionList = () => {
     const [isOpenDetails, setIsOpenDetails] = useState(false);
 
     const filteredItems = directives.filter(
-        (item) => item.name && item.name.toLowerCase().includes(filterText.toLowerCase()),
+        (item) => item.person.name && item.person.name.toLowerCase().includes(filterText.toLowerCase()) ||
+            item.person.surname && item.person.surname.toLowerCase().includes(filterText.toLowerCase()) ||
+            item.person.secondSurname && item.person.secondSurname.toLowerCase().includes(filterText.toLowerCase())
     );
 
     const getDirectives = () => {
-        axios({ url: "/person/", method: "GET" })
+        axios({ url: "/user/", method: "GET" })
             .then((response) => {
                 let data = response.data;
-                console.log(data)
-                let directivesTemp = data.filter(item => item.profession?.description === "Directivo")
-                console.log(directivesTemp)
-
-                setDirectives(directivesTemp); 
+                let directivesTemp = data.filter(item => item.person.profession.description === "Directivo")
+                setDirectives(directivesTemp);
                 setIsLoading(false);
             })
             .catch((error) => {
@@ -50,19 +49,65 @@ export const DirectionList = () => {
             });
     };
 
+    const onDelete = (idDelete) =>{
+        console.log(idDelete)
+        Alert.fire({
+            title: titleConfirmacion,
+            text: msjConfirmacion,
+            confirmButtonText: "Aceptar",
+            cancelButtonText: "Cancelar",
+            confirmButtonColor: "#198754",
+            cancelButtonColor: "#dc3545",
+            showCancelButton: true,
+            reverseButtons: true,
+            showLoaderOnConfirm: true,
+            icon: "warning",
+            preConfirm: () => {
+                return axios({ url: "/user/"+idDelete, method: "DELETE"})
+                    .then((response) => {
+                        if (!response.error) {
+                            getDirectives();
+                            Alert.fire({
+                                title: titleExito,
+                                text: msjExito,
+                                confirmButtonColor: "#198754",
+                                icon: "success",
+                                confirmButtonText: "Aceptar",
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    handleCloseForm();
+                                }
+                            });
+                        }
+                        return response;
+                    }).catch((error) => {
+                        console.log(error)
+                        Alert.fire({
+                            title: titleError,
+                            text: msjError,
+                            cancelButtonColor: "#198754",
+                            icon: "error",
+                            confirmButtonText: "Aceptar"
+                        });
+                    });
+            },
+            backdrop: true,
+            allowOutsideClick: !Alert.isLoading
+        });
+    }
+
     const formik = useFormik({
         initialValues: {
             name: "",
             surname: "",
             secondSurname: "",
-            email: "",
-            profession: 1
+            email: ""
         },
         validationSchema: yup.object().shape({
             name: yup.string().required("Campo obligatorio"),
             surname: yup.string().required("Campo obligatorio"),
             secondSurname: yup.string().required("Campo obligatorio"),
-            profession: yup.number().required("Campo obligatorio"),
+            email: yup.string().email("Ingresa un correo correcto").required("Campo obligatorio"),
         }),
         onSubmit: (values) => {
             const person = {
@@ -105,12 +150,9 @@ export const DirectionList = () => {
                 showLoaderOnConfirm: true,
                 icon: "warning",
                 preConfirm: () => {
-                    return axios({ url: "/person/", method: "POST", data: JSON.stringify(person) })
+                    return axios({ url: "/user/", method: "POST", data: JSON.stringify(person) })
                         .then((response) => {
-                            console.log(response)
                             if (!response.error) {
-                                // ... significa agregar un objeto a una lista
-                                //setPersonal(personal => [...personal, response.data])
                                 getDirectives();
                                 Alert.fire({
                                     title: titleExito,
@@ -149,7 +191,6 @@ export const DirectionList = () => {
 
     useEffect(() => {
         setIsLoading(true);
-        document.title = "PANAPO | Gestión de usuarios de alta dirección";
         getDirectives();
     }, []);
 
@@ -157,25 +198,27 @@ export const DirectionList = () => {
         {
             name: <h6 >#</h6>,
             cell: (row, index) => <div><h6>{index + 1}</h6></div>,
-            width: "4%"
+            width: "5%"
         },
         {
             name: <h6>Nombre del directivo</h6>,
-            cell: (row) => <div className="txt4">{row.name + " "}{row.surname + " "}{row.secondSurname}</div>,
+            cell: (row) => <div className="txt4">{row.person.name + " "}{row.person.surname + " "}{row.person.secondSurname}</div>,
+            width: "40%"
         },
         {
-            name: (
-                <div>
-                    <h6>Detalles</h6>
-                </div>
-            ),
+            name: <h6>Detalles</h6>,
             cell: (row) => (
                 <div>
                     <Button
                         variant="primary"
                         size="md"
                         onClick={() => {
-                            setValues(row);
+                            setValues({
+                                "name": row.person.name,
+                                "surname": row.person.surname,
+                                "secondSurname": row.person.secondSurname,
+                                "username": row.username,
+                            });
                             setIsOpenDetails(true);
                         }}
                     >
@@ -185,20 +228,25 @@ export const DirectionList = () => {
             ),
         },
         {
-            name: (
-                <div>
-                    <h6>Modificar</h6>
-                </div>
-            ),
+            name: <div><h6>Modificar</h6></div>,
             cell: (row) => (
                 <div>
                     <Button
                         variant="warning"
                         size="md"
                         onClick={() => {
-                            setValues(row)
+                            setValues({
+                                "id": row.id,
+                                "username": row.username,
+                                "status": row.status.id,
+                                "idPerson": row.person.id,
+                                "name": row.person.name,
+                                "surname": row.person.surname,
+                                "secondSurname": row.person.secondSurname,
+                                "statusPerson": row.person.status.id
+                            });
+                            console.log(values)
                             setIsOpenUpdate(true)
-                            console.log(row)
                         }}
                     >
                         <FeatherIcon icon="edit" />
@@ -207,18 +255,14 @@ export const DirectionList = () => {
             ),
         },
         {
-            name: (
-                <div>
-                    <h6>Eliminar</h6>
-                </div>
-            ),
+            name: <div><h6>Eliminar</h6></div>,
             cell: (row) => (
                 <div>
                     <Button
                         variant="danger"
                         size="md"
                         onClick={() => {
-                            setValues(row);
+                            onDelete(row.id);
                         }}
                     >
                         <FeatherIcon icon="trash" />
@@ -251,18 +295,18 @@ export const DirectionList = () => {
     return (
         <div className="content-wrapper screenHeight">
             <Container fluid>
-                <section class="content-header">
-                    <div class="container-fluid">
-                        <div class="row mb-2">
-                            <div class="col-sm-6">
-                                <h1 class="font-weight-bold">Gestión de usuarios de alta dirección</h1>
+                <section className="content-header">
+                    <div className="container-fluid">
+                        <div className="row mb-2">
+                            <div className="col-sm-6">
+                                <h1 className="font-weight-bold">Gestión de usuarios de alta dirección</h1>
                             </div>
                         </div>
                     </div>
                 </section>
                 <Row>
                     <Col>
-                        <Card>
+                        <Card className="mb-0">
                             <Card.Header
                                 onClick={() => setIsOpen(!isOpen)}
                                 aria-controls="example-collapse-text"
@@ -285,64 +329,55 @@ export const DirectionList = () => {
                             </Card.Header>
                             <Collapse in={isOpen}>
                                 <div id="example-collapse-text">
-                                    <Container fluid>
-                                        <Card.Body>
-                                            <Row>
-                                                <Col as="h6" className="text-bold">
-                                                    Datos del directivo
-                                                </Col>
-                                            </Row>
-                                            <div id="example-collapse-text">
-                                                <Form className="row">
-                                                    <Form.Group className="col-md-4 ">
-                                                        <Form.Label>Nombre(s)</Form.Label>
-                                                        <Form.Control type="text" placeholder="Emmanuel" name="name" value={formik.values.name}
-                                                            onChange={formik.handleChange} />
-                                                        {formik.errors.name ? (
-                                                            <span className='error-text'>{formik.errors.name}</span>
-                                                        ) : null}
-                                                    </Form.Group>
-                                                    <Form.Group className="col-md-4 ">
-                                                        <Form.Label>Primer Apellido</Form.Label>
-                                                        <Form.Control type="text" placeholder="Herrera" name="surname" value={formik.values.name}
-                                                            onChange={formik.handleChange} />
-                                                        {formik.errors.surname ? (
-                                                            <span className='error-text'>{formik.errors.surname}</span>
-                                                        ) : null}
-                                                    </Form.Group>
-                                                    <Form.Group className="col-md-4 ">
-                                                        <Form.Label>Segundo Apellido</Form.Label>
-                                                        <Form.Control type="text" placeholder="Ibarra" name="secondSurname" value={formik.values.secondSurname}
-                                                            onChange={formik.handleChange} />
-                                                        {formik.errors.secondSurname ? (
-                                                            <span className='error-text'>{formik.errors.secondSurname}</span>
-                                                        ) : null}
-                                                    </Form.Group>
-                                                    <Form.Group className="col-md-4 ">
-                                                        <Form.Label>Correo Electrónico</Form.Label>
-                                                        <Form.Control
-                                                            type="email"
-                                                            placeholder="utez@utez.edu.mx" name="email" value={formik.values.email}
-                                                            onChange={formik.handleChange} />
-                                                        {formik.errors.email ? (
-                                                            <span className='error-text'>{formik.errors.email}</span>
-                                                        ) : null}
-                                                    </Form.Group>
-                                                    <div className="d-grid gap-2 topBottom">
-                                                        <Button
-                                                            type="submit"
-                                                            style={{
-                                                                background: "#042B61",
-                                                                borderColor: "#042B61",
-                                                            }}
-                                                        >
-                                                            Registrar
-                                                        </Button>
-                                                    </div>
-                                                </Form>
+                                    <Card.Body>
+                                        <Form className="row" onSubmit={formik.handleSubmit}>
+                                            <Form.Group className="col-md-4 mt-3">
+                                                <Form.Label>Nombre(s)</Form.Label>
+                                                <Form.Control type="text" placeholder="Emmanuel" name="name" value={formik.values.name}
+                                                    onChange={formik.handleChange} />
+                                                {formik.errors.name ? (
+                                                    <span className='text-danger'>{formik.errors.name}</span>
+                                                ) : null}
+                                            </Form.Group>
+                                            <Form.Group className="col-md-4 mt-3">
+                                                <Form.Label>Primer apellido</Form.Label>
+                                                <Form.Control type="text" placeholder="Herrera" name="surname" value={formik.values.surname}
+                                                    onChange={formik.handleChange} />
+                                                {formik.errors.surname ? (
+                                                    <span className='text-danger'>{formik.errors.surname}</span>
+                                                ) : null}
+                                            </Form.Group>
+                                            <Form.Group className="col-md-4 mt-3">
+                                                <Form.Label>Segundo apellido</Form.Label>
+                                                <Form.Control type="text" placeholder="Ibarra" name="secondSurname" value={formik.values.secondSurname}
+                                                    onChange={formik.handleChange} />
+                                                {formik.errors.secondSurname ? (
+                                                    <span className='text-danger'>{formik.errors.secondSurname}</span>
+                                                ) : null}
+                                            </Form.Group>
+                                            <Form.Group className="col-md-6 mt-3">
+                                                <Form.Label>Correo electrónico</Form.Label>
+                                                <Form.Control
+                                                    type="email"
+                                                    placeholder="utez@utez.edu.mx" name="email" value={formik.values.email}
+                                                    onChange={formik.handleChange} />
+                                                {formik.errors.email ? (
+                                                    <span className='text-danger'>{formik.errors.email}</span>
+                                                ) : null}
+                                            </Form.Group>
+                                            <Form.Group className="col-md-6 mt-5">
+                                                <Form.Text muted>
+                                                    La contraseña del usuario será la misma que su correo
+                                                </Form.Text>
+                                            </Form.Group>
+                                            <div className="d-grid gap-2 mt-3">
+                                                <Button type="submit" style={{ background: "#042B61", borderColor: "#042B61" }}
+                                                    disabled={!(formik.isValid && formik.dirty)}>
+                                                    Registrar
+                                                </Button>
                                             </div>
-                                        </Card.Body>
-                                    </Container>
+                                        </Form>
+                                    </Card.Body>
                                 </div>
                             </Collapse>
                         </Card>
@@ -370,17 +405,16 @@ export const DirectionList = () => {
                                 />
                                 <DirectionEdit
                                     isOpenUpdate={isOpenUpdate}
-                                    handleClose={() => setIsOpenUpdate(false)}
+                                    handleClose={setIsOpenUpdate}
                                     setDirectives={setDirectives}
+                                    getDirectives={getDirectives}
                                     {...values}
                                 />
                                 <DirectionDetails
                                     isOpenDetails={isOpenDetails}
-                                    handleClose={() => setIsOpenDetails(false)}
+                                    handleClose={setIsOpenDetails}
                                     {...values}
                                 />
-
-
                             </Card.Body>
                         </Card>
                     </Col>

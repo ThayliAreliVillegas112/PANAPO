@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Button, Col, Form, Modal, Row } from "react-bootstrap";
-import FeatherIcon from "feather-icons-react";
 import Alert, {
     msjConfirmacion,
     titleConfirmacion,
@@ -9,12 +8,13 @@ import Alert, {
     msjExito,
     titleExito,
 } from "../../../shared/plugins/alert";
+import * as yup from "yup";
 import axios from "../../../shared/plugins/axios";
+import { useFormik } from "formik";
 
 export const PersonalEdit = ({
     isOpenUpdate,
     handleClose,
-    setPersonal,
     getPersonal,
     id,
     name,
@@ -38,70 +38,85 @@ export const PersonalEdit = ({
         status: status
     });
 
-    const handleChange = (event) => {
-        const { name, value } = event.target;
-        setValues({ ...values, [name]: value });
-    }
-
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        const person = {
-            ...values,
-            profession: {
-                id: parseInt(values.profession)
-            },
-            status: {
-                id: parseInt(values.status)
-            }
-        };
-        console.log(person);
-        Alert.fire({
-            title: titleConfirmacion,
-            text: msjConfirmacion,
-            confirmButtonText: "Aceptar",
-            cancelButtonText: "Cancelar",
-            showCancelButton: true,
-            reverseButtons: true,
-            showLoaderOnConfirm: true,
-            icon: "warning",
-            preConfirm: () => {
-                return axios({
-                    url: "/person/",
-                    method: "PUT",
-                    data: JSON.stringify(person),
-                })
-                    .then((response) => {
-                        console.log(response);
-                        if (!response.error) {
-                            handleCloseForm();
-                            getPersonal();
+    const formikModify = useFormik({
+        initialValues: {
+            name: "",
+            surname: "",
+            secondSurname: "",
+            dateBirth: "",
+            phone: "",
+            email: "",
+            profession: 1,
+        },
+        validationSchema: yup.object().shape({
+            name: yup.string().required("Campo obligatorio"),
+            surname: yup.string().required("Campo obligatorio"),
+            secondSurname: yup.string().required("Campo obligatorio"),
+            dateBirth: yup.string().required("Campo obligatorio"),
+            phone: yup.string().required("Campo obligatorio"),
+            profession: yup.number().required("Campo obligatorio"),
+        }),
+        onSubmit: (valuesFormik) => {
+            const person = {
+                ...valuesFormik,
+                id: id,
+                profession: {
+                    id: parseInt(valuesFormik.profession)
+                },
+                status: {
+                    id: status
+                }
+            };
+            console.log(person);
+            Alert.fire({
+                title: titleConfirmacion,
+                text: msjConfirmacion,
+                confirmButtonText: "Aceptar",
+                cancelButtonText: "Cancelar",
+                showCancelButton: true,
+                reverseButtons: true,
+                showLoaderOnConfirm: true,
+                icon: "warning",
+                preConfirm: () => {
+                    return axios({
+                        url: "/person/",
+                        method: "PUT",
+                        data: JSON.stringify(person),
+                    })
+                        .then((response) => {
+                            console.log(response);
+                            if (!response.error) {
+                                handleCloseForm();
+                                getPersonal();
+                                Alert.fire({
+                                    title: titleExito,
+                                    text: msjExito,
+                                    icon: "success",
+                                    confirmButtonText: "Aceptar",
+                                });
+                            }
+                            return response;
+                        })
+                        .catch((error) => {
                             Alert.fire({
-                                title: titleExito,
-                                text: msjExito,
-                                icon: "success",
+                                title: titleError,
+                                confirmButtonColor: "#198754",
+                                text: msjError,
+                                icon: "error",
                                 confirmButtonText: "Aceptar",
                             });
-                        }
-                        return response;
-                    })
-                    .catch((error) => {
-                        Alert.fire({
-                            title: titleError,
-                            confirmButtonColor: "#198754",
-                            text: msjError,
-                            icon: "error",
-                            confirmButtonText: "Aceptar",
                         });
-                    });
-            },
-            backdrop: true,
-            allowOutsideClick: !Alert.isLoading,
-        });
-    };
+                },
+                backdrop: true,
+                allowOutsideClick: !Alert.isLoading,
+            });
+        },
+    });
 
     const handleCloseForm = () => {
-        handleClose(false);
+        formikModify.resetForm();
         setValues({});
+        handleClose(false);
     };
 
     useEffect(() => {
@@ -116,11 +131,18 @@ export const PersonalEdit = ({
             phone: phone,
             profession: profession,
         });
-    }, [id, status, name, surname, secondSurname, email, dateBirth, phone, profession]);
+        formikModify.values.name = name;
+        formikModify.values.email = email;
+        formikModify.values.surname = surname;
+        formikModify.values.secondSurname = secondSurname;
+        formikModify.values.dateBirth = dateBirth;
+        formikModify.values.phone = phone;
+        formikModify.values.profession = profession;
+    }, [isOpenUpdate]);
 
     return (
         <>
-            <Modal show={isOpenUpdate} onHide={handleCloseForm}>
+            <Modal show={isOpenUpdate} onHide={handleCloseForm} size="lg">
                 <Modal.Header
                     closeButton
                     className="backgroundHeadModal"
@@ -129,59 +151,70 @@ export const PersonalEdit = ({
                     <Modal.Title>Modificar datos del personal</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <Form className="row" onSubmit={handleSubmit}>
+                    <Form className="row" onSubmit={formikModify.handleSubmit}>
                         <Form.Group className="col-md-4 mb-4">
                             <Form.Label className="form-label">Nombre</Form.Label>
                             <Form.Control
                                 name="name"
-                                value={values.name}
-                                onChange={handleChange}
+                                value={formikModify.values.name}
+                                onChange={formikModify.handleChange}
                             />
-                            {/* {formik.errors.description ? (
-                                     <span className="error-text">{formik.errors.description}</span>
-                                 ) : null} */}
+                            {formikModify.errors.name ? (
+                                <span className='text-danger'>{formikModify.errors.name}</span>
+                            ) : null}
                         </Form.Group>
                         <Form.Group className="col-md-4 mb-4">
                             <Form.Label className="form-label">Primer apellido</Form.Label>
                             <Form.Control
                                 name="surname"
-                                value={values.surname}
-                                onChange={handleChange}
+                                value={formikModify.values.surname}
+                                onChange={formikModify.handleChange}
                             />
+                            {formikModify.errors.surname ? (
+                                <span className='text-danger'>{formikModify.errors.surname}</span>
+                            ) : null}
                         </Form.Group>
-
                         <Form.Group className="col-md-4 mb-4">
                             <Form.Label className="form-label">Segundo apellido</Form.Label>
                             <Form.Control
                                 name="secondSurname"
-                                value={values.secondSurname}
-                                onChange={handleChange}
+                                value={formikModify.values.secondSurname}
+                                onChange={formikModify.handleChange}
                             />
+                            {formikModify.errors.secondSurname ? (
+                                <span className='text-danger'>{formikModify.errors.secondSurname}</span>
+                            ) : null}
                         </Form.Group>
                         <Form.Group className="col-md-6 mb-4">
                             <Form.Label className="form-label">Fecha de nacimiento</Form.Label>
                             <Form.Control
                                 type="date"
                                 name="dateBirth"
-                                value={values.dateBirth}
-                                onChange={handleChange}
+                                value={formikModify.values.dateBirth}
+                                onChange={formikModify.handleChange}
                             />
+                            {formikModify.errors.dateBirth ? (
+                                <span className='text-danger'>{formikModify.errors.dateBirth}</span>
+                            ) : null}
                         </Form.Group>
                         <Form.Group className="col-md-6 mb-4">
                             <Form.Label>Teléfono</Form.Label>
                             <Form.Control
                                 type="tel"
                                 name="phone"
-                                value={values.phone}
-                                onChange={handleChange}
+                                value={formikModify.values.phone}
+                                onChange={formikModify.handleChange}
                             />
+                            {formikModify.errors.phone ? (
+                                <span className='text-danger'>{formikModify.errors.phone}</span>
+                            ) : null}
                         </Form.Group>
                         <Form.Group className="col-md-6 mb-4">
                             <Form.Label>Rol</Form.Label>
                             <Form.Select aria-label="Seleccionar una opción"
-                                value={values.profession} onChange={handleChange} name="profession">
+                                value={formikModify.values.profession} onChange={formikModify.handleChange} name="profession">
                                 {
-                                    values.profession === "1" ? (
+                                    formikModify.values.profession === "1" ? (
                                         <>
                                             <option value="1">Docente</option>
                                             <option value="2">Becario</option>
@@ -209,7 +242,7 @@ export const PersonalEdit = ({
                                         style={{ background: "#042B61", borderColor: "#042B61" }}
                                         className="ms-3"
                                         type="submit"
-                                        disabled={false}
+                                        disabled={!(formikModify.isValid && formikModify.dirty)}
                                     >
                                         Guardar
                                     </Button>

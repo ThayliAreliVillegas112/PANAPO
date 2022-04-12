@@ -15,59 +15,69 @@ import Alert, { msjConfirmacion, titleConfirmacion, titleError, msjError, msjExi
 
 export const UserList = ({ handleClose }) => {
 
-    
+
 
     const [filterText, setFilterText] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
     const [users, setUsers] = useState([]);
-    const [person, setPerson] = useState([]);
+    const [person1, setPerson1] = useState([]);
     const [rol, setRol] = useState([]);
     const [values, setValues] = useState({});
-
-
     const [isOpen, setIsOpen] = useState(false);
     const [isOpenUpdate, setIsOpenUpdate] = useState(false);
-    const [isOpenDelete, setIsOpenDelete] = useState(false);
     const [isOpenDetails, setIsOpenDetails] = useState(false);
 
-  
+
     useEffect(() => {
         setIsLoading(true);
         document.title = "PANAPO | Gestión de usuarios";
         getUser();
-        const getPerson = () => {
-            axios({ url: "/person/", method: "GET" })
-                .then((response) => {
-                    console.log(response);
-                    setPerson(response.data);
-                    setIsLoading(false);
-                })
-                .catch((error) => {
-                    console.log(error);
-                });
-        };
         getPerson();
-        const getRol = () => {
-            axios({ url: "/rol/", method: "GET" })
-                .then((response) => {
-                    console.log(response);
-                    setRol(response.data);
-                    setIsLoading(false);
-                })
-                .catch((error) => {
-                    console.log(error);
-                });
-        };
         getRol();
     }, []);
+
+    const getPerson = () => {
+        axios({ url: "/person/", method: "GET" })
+            .then((response) => {
+                console.log(response);
+                setPerson1(response.data);
+                setIsLoading(false);
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    };
+    const getRol = () => {
+        axios({ url: "/rol/", method: "GET" })
+            .then((response) => {
+                console.log(response);
+                setRol(response.data);
+                setIsLoading(false);
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    };
+
+    const getUser = () => {
+        axios({ url: "/user/", method: "GET" })
+            .then((response) => {
+                console.log(response);
+                setUsers(response.data);
+                setIsLoading(false);
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    };
 
     //VIDEO
     const handleEmail = (event) => {
         const getEmailId = event.target.value;
         console.log(getEmailId);
     }
-
+    
     const columns = [
         {
             name: <h6 >#</h6>,
@@ -75,7 +85,7 @@ export const UserList = ({ handleClose }) => {
             width: "4%"
         },
         {
-            name: <h6 className="text-center">Nombre del Usuario</h6>,
+            name: <h6 className="text-center">Nombre de Usuario</h6>,
             cell: (row) => <div className="txt4">{row.username + " "}</div>,
         },
         {
@@ -121,51 +131,83 @@ export const UserList = ({ handleClose }) => {
             ),
         },
         {
-            name: (
-                <div>
-                    <h6>Desactivar</h6>
-                </div>
-            ),
-            cell: (row) => (
-                <div>
-                    <Button
-                        variant="danger"
-                        size="md"
-                        onClick={() => {
-                            setValues(row);
-                            setIsOpenDelete(true);
-                        }}
-                    >
+            name: <div><h6>Desactivar</h6></div>,
+            cell: (row) => <div>
+                {row.status.description === "Activo" ? (
+                    <Button variant="danger" size="md"
+                        onClick={() => statusChange(row)}>
                         <FeatherIcon icon="slash" />
                     </Button>
-                </div>
-            ),
-        },
+                ) : (
+                    <Button variant="success" size="md"
+                        onClick={() => statusChange(row)}>
+                        <FeatherIcon icon="check-circle" />
+                    </Button>
+                )}
+            </div>
+
+        }
     ];
 
-
-
-    // const typeClient = [
-    //     { id: 1, description: "Interno" },
-    //     { id: 2, description: "Externo" }
-    // ]
-
-    // const handleSelectChange = (event) => {
-    //     console.log(event);
-    // }
-
-    const getUser = () => {
-        axios({ url: "/user/", method: "GET" })
-            .then((response) => {
-                console.log(response);
-                setUsers(response.data);
-                setIsLoading(false);
+    const statusChange = (users) => {
+        Alert.fire({
+          title: titleConfirmacion,
+          text: msjConfirmacion,
+          confirmButtonText: "Aceptar",
+          cancelButtonText: "Cancelar",
+          confirmButtonColor: "#198754",
+          cancelButtonColor: "#dc3545",
+          showCancelButton: true,
+          reverseButtons: true,
+          showLoaderOnConfirm: true,
+          icon: "warning",
+          backdrop: true,
+          allowOutsideClick: !Alert.isLoading,
+          preConfirm: () => {
+            let personalUpdate = {};
+            if (users.status.description === 'Activo') {
+                personalUpdate = {
+                ...users,
+                status: { id: 2 }
+              };
+            } else {
+                personalUpdate = {
+                ...users,
+                status: { id: 1 }
+              };
+            }
+            return axios({
+              url: "/user/",
+              method: 'PUT',
+              data: JSON.stringify(personalUpdate)
             })
-            .catch((error) => {
+              .then((response => {
+                if (!response.error) { 
+                  getUser();
+                  Alert.fire({
+                    title: titleExito,
+                    text: msjExito,
+                    icon: "success",
+                    confirmButtonText: "Aceptar",
+                    confirmButtonColor: "#198754",
+                  });
+                } else {
+                  Alert.fire({
+                    title: titleError,
+                    text: msjError,
+                    icon: "error",
+                    confirmButtonText: "Aceptar",
+                    confirmButtonColor: "#198754",
+                  });
+                }
+                return response;
+              }))
+              .catch((error) => {
                 console.log(error);
-            });
-    };
-
+              })
+          }
+        });
+      }
 
     const paginationOptions = {
         rowsPerPageText: "Filas por página",
@@ -189,15 +231,16 @@ export const UserList = ({ handleClose }) => {
 
     const formik = useFormik({
         initialValues: {
+            username: "",
+            person: "",
+            status: 1,
             authorities: "",
-            email: "",
         },
         validationSchema: yup.object().shape({
-
-            authorities: yup
+            username: yup
                 .string()
                 .required("Campo obligatorio"),
-            email: yup
+            authorities: yup
                 .string()
                 .required("Campo obligatorio"),
 
@@ -205,9 +248,13 @@ export const UserList = ({ handleClose }) => {
         onSubmit: (values) => {
             const person = {
                 ...values,
-                profession: {
-                    id: parseInt(values.profession)
+                person: {
+                    id: values.id,
                 },
+                status: {
+                    id: values.status
+                },
+
             };
             console.log(person)
             Alert.fire({
@@ -226,9 +273,7 @@ export const UserList = ({ handleClose }) => {
                         .then((response) => {
                             console.log(response)
                             if (!response.error) {
-                                // ... significa agregar un objeto a una lista
-                                //setPersonal(personal => [...personal, response.data])
-                                // getPersonal();
+                                getUser();
                                 Alert.fire({
                                     title: titleExito,
                                     text: msjExito,
@@ -261,8 +306,7 @@ export const UserList = ({ handleClose }) => {
 
     const handleCloseForm = () => {
         formik.resetForm();
-        handleClose(false);
-
+        setIsOpen(false);
     };
 
     return (
@@ -304,10 +348,11 @@ export const UserList = ({ handleClose }) => {
                                 <Container fluid>
                                     <Card.Body>
                                         <div id="example-collapse-text">
-                                            <Form className="row">
+                                            <Form className="row" onSubmit={formik.handleSubmit}>
                                                 <Form.Group className="col-md-6 mb-4" >
                                                     <Form.Label>Rol</Form.Label>
                                                     <Form.Select onChange={formik.handleChange} name="authorities" value={formik.values.authorities}>
+                                                        <option>Seleccione una opción</option>
                                                         {
                                                             rol.map((rols) => (
                                                                 <option key={rols.id} value={rols.id} >{rols.description}</option>
@@ -326,31 +371,29 @@ export const UserList = ({ handleClose }) => {
                                                         ))}
                                                     </Form.Select>
                                                     <Select options={getPerson}></Select> */}
-                                                    <Form.Select name="email" value={formik.values.email} onChange={formik.handleChange}>
+
+                                                    <Form.Select name="username" value={formik.values.username} onChange={formik.handleChange}>
+                                                        <option>Seleccione una opción</option>
                                                         {
-                                                            person.map((personemail) => (
+                                                            person1.map((personemail) => (
                                                                 <option key={personemail.id} value={personemail.id} >{personemail.email}</option>
                                                             ))
                                                         }
                                                     </Form.Select>
-                                                    {formik.errors.email ? (
-                                                        <span className="error-text">{formik.errors.email}</span>
+                                                    {formik.errors.username ? (
+                                                        <span className="error-text">{formik.errors.username}</span>
                                                     ) : null}
                                                 </Form.Group>
+                                                <br />
+                                                <div className="d-grid gap-2">
+                                                    <Button type="submit" style={{ background: "#042B61", borderColor: "#042B61", }}
+                                                        disabled={!(formik.isValid && formik.dirty)}>
+                                                        Registrar
+                                                    </Button>
+                                                </div>
                                             </Form>
                                         </div>
-                                        <br />
-                                        <div className="d-grid gap-2">
-                                            <Button
-                                                type="submit"
-                                                style={{
-                                                    background: "#042B61",
-                                                    borderColor: "#042B61",
-                                                }}
-                                            >
-                                                Registrar
-                                            </Button>
-                                        </div>
+
                                     </Card.Body>
                                 </Container>
 
