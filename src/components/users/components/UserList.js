@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import FeatherIcon from "feather-icons-react";
 import { useNavigate } from "react-router-dom";
-import {Button,Card,Col,Collapse,Container,Form,Row} from "react-bootstrap";
+import { Button, Card, Col, Collapse, Container, Form, Row } from "react-bootstrap";
 import DataTable from "react-data-table-component";
 import { Formik, useFormik } from "formik";
 import * as yup from "yup";
@@ -15,31 +15,58 @@ import Alert, { msjConfirmacion, titleConfirmacion, titleError, msjError, msjExi
 
 export const UserList = ({ handleClose }) => {
 
-    let value = "";
-
-    const navigation = useNavigate();
+    
 
     const [filterText, setFilterText] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
     const [users, setUsers] = useState([]);
     const [person, setPerson] = useState([]);
+    const [rol, setRol] = useState([]);
     const [values, setValues] = useState({});
+
 
     const [isOpen, setIsOpen] = useState(false);
     const [isOpenUpdate, setIsOpenUpdate] = useState(false);
     const [isOpenDelete, setIsOpenDelete] = useState(false);
     const [isOpenDetails, setIsOpenDetails] = useState(false);
 
-    const setValue = (id) => {
-        value = id;
-    };
-
+  
     useEffect(() => {
         setIsLoading(true);
         document.title = "PANAPO | Gestión de usuarios";
         getUser();
+        const getPerson = () => {
+            axios({ url: "/person/", method: "GET" })
+                .then((response) => {
+                    console.log(response);
+                    setPerson(response.data);
+                    setIsLoading(false);
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+        };
+        getPerson();
+        const getRol = () => {
+            axios({ url: "/rol/", method: "GET" })
+                .then((response) => {
+                    console.log(response);
+                    setRol(response.data);
+                    setIsLoading(false);
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+        };
+        getRol();
     }, []);
+
+    //VIDEO
+    const handleEmail = (event) => {
+        const getEmailId = event.target.value;
+        console.log(getEmailId);
+    }
 
     const columns = [
         {
@@ -49,7 +76,7 @@ export const UserList = ({ handleClose }) => {
         },
         {
             name: <h6 className="text-center">Nombre del Usuario</h6>,
-            cell: (row) => <div className="txt4">{row.name + " "}{row.surname + " "}{row.lastname}</div>,
+            cell: (row) => <div className="txt4">{row.username + " "}</div>,
         },
         {
             name: (
@@ -116,18 +143,16 @@ export const UserList = ({ handleClose }) => {
         },
     ];
 
-    const getPerson = () => {
-        axios({ url: "/person/", method: "GET" })
-            .then((response) => {
-                console.log(response);
 
-                setPerson(response.data);
-                setIsLoading(false);
-            })
-            .catch((error) => {
-                console.log(error);
-            });
-    };
+
+    // const typeClient = [
+    //     { id: 1, description: "Interno" },
+    //     { id: 2, description: "Externo" }
+    // ]
+
+    // const handleSelectChange = (event) => {
+    //     console.log(event);
+    // }
 
     const getUser = () => {
         axios({ url: "/user/", method: "GET" })
@@ -141,7 +166,7 @@ export const UserList = ({ handleClose }) => {
             });
     };
 
-   
+
     const paginationOptions = {
         rowsPerPageText: "Filas por página",
         rangeSeparatorText: "de",
@@ -164,25 +189,27 @@ export const UserList = ({ handleClose }) => {
 
     const formik = useFormik({
         initialValues: {
-            
-            typeClient: 1
-
+            authorities: "",
+            email: "",
         },
         validationSchema: yup.object().shape({
-           
-            typeClient: yup
-                .number()
-                .required("Campo obligatorio")
+
+            authorities: yup
+                .string()
+                .required("Campo obligatorio"),
+            email: yup
+                .string()
+                .required("Campo obligatorio"),
 
         }),
         onSubmit: (values) => {
-            const cliente = {
+            const person = {
                 ...values,
-                typeClient: {
-                    id: parseInt(values.typeClient)
+                profession: {
+                    id: parseInt(values.profession)
                 },
             };
-            console.log(cliente);
+            console.log(person)
             Alert.fire({
                 title: titleConfirmacion,
                 text: msjConfirmacion,
@@ -195,16 +222,13 @@ export const UserList = ({ handleClose }) => {
                 showLoaderOnConfirm: true,
                 icon: "warning",
                 preConfirm: () => {
-                    return axios({
-                        url: "/client/",
-                        method: "POST",
-                        data: JSON.stringify(cliente),
-                    })
+                    return axios({ url: "/user/", method: "POST", data: JSON.stringify(person) })
                         .then((response) => {
-                            console.log(response);
+                            console.log(response)
                             if (!response.error) {
-                                // getClients();
-
+                                // ... significa agregar un objeto a una lista
+                                //setPersonal(personal => [...personal, response.data])
+                                // getPersonal();
                                 Alert.fire({
                                     title: titleExito,
                                     text: msjExito,
@@ -218,20 +242,19 @@ export const UserList = ({ handleClose }) => {
                                 });
                             }
                             return response;
-                        })
-                        .catch((error) => {
-                            console.log(error);
+                        }).catch((error) => {
+                            console.log(error)
                             Alert.fire({
                                 title: titleError,
                                 text: msjError,
                                 cancelButtonColor: "#198754",
                                 icon: "error",
-                                confirmButtonText: "Aceptar",
+                                confirmButtonText: "Aceptar"
                             });
                         });
                 },
                 backdrop: true,
-                allowOutsideClick: !Alert.isLoading,
+                allowOutsideClick: !Alert.isLoading
             });
         },
     });
@@ -239,7 +262,7 @@ export const UserList = ({ handleClose }) => {
     const handleCloseForm = () => {
         formik.resetForm();
         handleClose(false);
-        
+
     };
 
     return (
@@ -284,20 +307,35 @@ export const UserList = ({ handleClose }) => {
                                             <Form className="row">
                                                 <Form.Group className="col-md-6 mb-4" >
                                                     <Form.Label>Rol</Form.Label>
-                                                    <Form.Select aria-label="Default select example">
-                                                        <option value="1">Directivo</option>
-                                                        <option value="1">Coordinador</option>
-                                                        <option value="2">Responsable de proyecto</option>
-                                                        <option value="3">Responsable de desarrollo</option>
+                                                    <Form.Select onChange={formik.handleChange} name="authorities" value={formik.values.authorities}>
+                                                        {
+                                                            rol.map((rols) => (
+                                                                <option key={rols.id} value={rols.id} >{rols.description}</option>
+                                                            ))
+                                                        }
                                                     </Form.Select>
+                                                    {formik.errors.authorities ? (
+                                                        <span className="error-text">{formik.errors.authorities}</span>
+                                                    ) : null}
                                                 </Form.Group>
                                                 <Form.Group className="col-md-6 mb-4" >
                                                     <Form.Label>Correo</Form.Label>
-                                                    <Form.Select aria-label="Default select example">
-                                                        <option value="1">miri@gmail.com</option>
-                                                        <option value="1">roy@gmail.com</option>
-                                                        <option value="2">hola@gmail.com</option>
+                                                    {/* <Form.Select aria-label="Default select example">
+                                                        {person.map((item)=> (
+                                                            <option key={item.id} value={item.id} >{item.person.email}</option>
+                                                        ))}
                                                     </Form.Select>
+                                                    <Select options={getPerson}></Select> */}
+                                                    <Form.Select name="email" value={formik.values.email} onChange={formik.handleChange}>
+                                                        {
+                                                            person.map((personemail) => (
+                                                                <option key={personemail.id} value={personemail.id} >{personemail.email}</option>
+                                                            ))
+                                                        }
+                                                    </Form.Select>
+                                                    {formik.errors.email ? (
+                                                        <span className="error-text">{formik.errors.email}</span>
+                                                    ) : null}
                                                 </Form.Group>
                                             </Form>
                                         </div>

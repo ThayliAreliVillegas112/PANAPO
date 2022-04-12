@@ -13,14 +13,7 @@ import Alert, { msjConfirmacion, titleConfirmacion, titleError, msjError, msjExi
 import { Link, useNavigate } from 'react-router-dom';
 import "../../../assets/css/main.css";
 
-export const ClientList = ({ handleClose }) => {
-
-    let value = "";
-    const navigation = useNavigate();
-
-    const setValue = (id) => {
-        value = id;
-    }
+export const ClientList = () => {
 
     const [clients, setClients] = useState([]);
     const [filterText, setFilterText] = useState("");
@@ -37,11 +30,6 @@ export const ClientList = ({ handleClose }) => {
         (item) => item.name && item.name.toLowerCase().includes(filterText.toLowerCase()) || item.surname && item.surname.toLowerCase().includes(filterText.toLowerCase()) || item.second_surname && item.second_surname.toLowerCase().includes(filterText.toLowerCase()),
     );
 
-    useEffect(() => {
-        setIsLoading(true);
-        document.title = "PANAPO | Gestión de clientes";
-        getClients();
-    }, []);
 
     const getClients = () => {
         axios({ url: "/client/", method: "GET" })
@@ -57,83 +45,45 @@ export const ClientList = ({ handleClose }) => {
 
     const formik = useFormik({
         initialValues: {
-            company: "",
-            emailClient: "",
-            emailRepre: "",
-            extension: "",
             name: "",
-            nameRepre: "",
-            phoneClient: "",
-            phoneRepre: "",
-            secondSurname: "",
-            secondSurnameRepre: "",
             surname: "",
-            surnameRepre: "",
+            secondSurname: "",
+            company: "",
+            phoneClient: "",
+            emailClient: "",
             typeClient: 1,
+            nameRepre: "",
+            surnameRepre: "",
+            secondSurnameRepre: "",
+            phoneRepre: "",
+            emailRepre: "", 
+            extension: ""
 
         },
         validationSchema: yup.object().shape({
-            company: yup
-                .string()
-                .required("Campo obligatorio")
-                .min(3, "Minimo 2 caracteres"),
-            emailClient: yup
-                .string()
-                .required("Campo obligatorio")
-                .min(3, "Minimo 2 caracteres"),
-            emailRepre: yup
-                .string()
-                .email("Ingresa un correo correcto")
-                .required("Campo obligatorio"),
-            extension: yup
-                .number()
-                .required("Campo obligatorio")
-                .min(4, "Deben ser 4 digitos"),
-            name: yup
-                .string()
-                .required("Campo obligatorio")
-                .min(3, "Minimo 2 caracteres"),
-            nameRepre: yup
-                .string()
-                .required("Campo obligatorio")
-                .min(3, "Minimo 2 caracteres"),
-            phoneClient: yup
-                .number()
-                .required("Campo obligatorio")
-                .min(10, "Deben ser 10 digitos"),
-            phoneRepre: yup
-                .string()
-                .required("Campo obligatorio")
-                .min(10, "Deben ser 10 digitos"),
-            secondSurname: yup
-                .string()
-                .required("Campo obligatorio")
-                .min(3, "Minimo 2 caracteres"),
-            secondSurnameRepre: yup
-                .string()
-                .required("Campo obligatorio")
-                .min(3, "Minimo 2 caracteres"),
-            surname: yup
-                .string()
-                .required("Campo obligatorio")
-                .min(3, "Minimo 2 caracteres"),
-            surnameRepre: yup
-                .string()
-                .required("Campo obligatorio")
-                .min(3, "Minimo 2 caracteres"),
-            typeClient: yup
-                .number()
-                .required("Campo obligatorio")
+            name: yup.string().required("Campo obligatorio"),
+            surname: yup.string().required("Campo obligatorio"),
+            secondSurname: yup.string().required("Campo obligatorio"),
+            company: yup.string().required("Campo obligatorio"),
+            phoneClient: yup.string().required("Campo obligatorio"),
+            emailClient: yup.string().required("Campo obligatorio"),
+            typeClient: yup.number().required("Campo obligatorio"),
+            nameRepre: yup.string().required("Campo obligatorio"),
+            surnameRepre: yup.string().required("Campo obligatorio"),
+            secondSurnameRepre: yup.string().required("Campo obligatorio"),
+            phoneRepre: yup.string().required("Campo obligatorio"),
+            emailRepre: yup.string().required("Campo obligatorio"),
+            extension: yup.string().required("Campo obligatorio")
 
         }),
         onSubmit: (values) => {
-            const cliente1 = {
-                ...values,
+            const cliente = {
+               ...values,
                 typeClient: {
                     id: parseInt(values.typeClient)
                 },
             };
-            console.log(cliente1);
+            console.log(cliente);
             Alert.fire({
                 title: titleConfirmacion,
                 text: msjConfirmacion,
@@ -146,16 +96,11 @@ export const ClientList = ({ handleClose }) => {
                 showLoaderOnConfirm: true,
                 icon: "warning",
                 preConfirm: () => {
-                    return axios({
-                        url: "/client/",
-                        method: "POST",
-                        data: JSON.stringify(cliente1),
-                    })
+                    return axios({ url: "/client/", method: "POST", data: JSON.stringify(cliente) })
                         .then((response) => {
                             console.log(response);
                             if (!response.error) {
                                 getClients();
-
                                 Alert.fire({
                                     title: titleExito,
                                     text: msjExito,
@@ -191,6 +136,13 @@ export const ClientList = ({ handleClose }) => {
         formik.resetForm();
         setIsOpen(false);
     };
+
+    useEffect(() => {
+        setIsLoading(true);
+        document.title = "PANAPO | Gestión de clientes";
+        getClients();
+    }, []);
+
 
 
     const columns = [
@@ -371,7 +323,9 @@ export const ClientList = ({ handleClose }) => {
                                                                     </Form.Group>
                                                                     <Form.Group className="col-md-6 mb-4" >
                                                                         <Form.Label>Tipo de cliente</Form.Label>
-                                                                        <Form.Select aria-label="" name="typeClient" value={formik.values.typeClient} onChange={formik.handleChange} >
+                                                                        <Form.Select aria-label="Seleccionar tipo de cliente" name="typeClient"
+                                                                            value={formik.values.typeClient}
+                                                                            onChange={formik.handleChange}>
                                                                             <option value="">Seleccione una opción</option>
                                                                             <option value="1">Interno</option>
                                                                             <option value="2">Externo</option>

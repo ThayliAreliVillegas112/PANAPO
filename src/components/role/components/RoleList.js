@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { Button, Row, Col, Container, Form, Card, InputGroup, FormControl, Collapse } from "react-bootstrap";
+import { Button, Row, Col, Container, Form, Card, Collapse } from "react-bootstrap";
 import FeatherIcon from "feather-icons-react";
 import DataTable from "react-data-table-component";
-import { Formik, useFormik } from "formik";
-import * as yup from "yup";
+import "../../../assets/css/main.css";
+import "../../../assets/css/util.css";
 import { RoleEdit } from "./RoleEdit";
-import axios from "../../../shared/plugins/axios";
 import { CustomLoader } from "../../../shared/components/CustomLoader";
 import { FilterComponent } from "../../../shared/components/FilterComponent";
+import * as yup from "yup";
+import { useFormik } from "formik";
+import axios from "../../../shared/plugins/axios";
 import Alert, { msjConfirmacion, titleConfirmacion, titleError, msjError, msjExito, titleExito } from "../../../shared/plugins/alert";
-import main from "../../../assets/css/main.css";
 
 
 export const RoleList = () => {
@@ -17,7 +18,6 @@ export const RoleList = () => {
     const [filterText, setFilterText] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
-    
     const [values, setValues] = useState({});
     const [isOpenUpdate, setIsOpenUpdate] = useState(false);
 
@@ -25,12 +25,7 @@ export const RoleList = () => {
         (item) => item.description && item.description.toLowerCase().includes(filterText.toLowerCase()) || item.acronym && item.acronym.toLowerCase().includes(filterText.toLowerCase()) ,
     );
 
-    useEffect(() => {
-        setIsLoading(true);
-        document.title = "PANAPO | Gestión de Roles";
-        getRoles();
-    }, []);
-
+    
     const getRoles = () => {
         axios({ url: "/rol/", method: "GET" })
             .then((response) => {
@@ -123,6 +118,12 @@ export const RoleList = () => {
         setIsOpen(false);
     };
 
+    useEffect(() => {
+        setIsLoading(true);
+        document.title = "PANAPO | Gestión de Roles";
+        getRoles();
+    }, []);
+
     const columns = [
         {
             name: <h6>#</h6>,
@@ -165,7 +166,7 @@ export const RoleList = () => {
     }, [filterText]);
 
     return (
-        <div className="content-wrapper" style={{"min-height": "100vh"}}>
+        <div className="content-wrapper  screenHeight">
             <Container fluid >
                 <section class="content-header">
                     <div class="container-fluid">

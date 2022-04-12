@@ -9,6 +9,8 @@ export const ClientEdit = ({
     isOpenUpdate,
     handleClose,
     setClients,
+    getClients,
+    id,
     phoneClient,
     emailClient,
     nameRepre,
@@ -19,70 +21,83 @@ export const ClientEdit = ({
     status
 }) => {
 
-    const [values, setValues] = useState({ phoneClient: phoneClient, emailClient: emailClient, nameRepre: nameRepre, surnameRepre: surnameRepre, secondSurnameRepre: secondSurnameRepre, phoneRepre: phoneRepre, emailRepre: emailRepre, status: status });
+    const [values, setValues] = useState({
+        id: id,
+        phoneClient: phoneClient,
+        emailClient: emailClient,
+        nameRepre: nameRepre,
+        surnameRepre: surnameRepre,
+        secondSurnameRepre: secondSurnameRepre,
+        phoneRepre: phoneRepre,
+        emailRepre: emailRepre,
+        status: status
+    });
 
-    // const handleChange = (event) =>{
-    //   const { name, value } = event.target;
-    //   setValues({ ...values, [name]: value});
-    // }  
+    const handleChange = (event) => {
+        const { name, value } = event.target;
+        setValues({ ...values, [name]: value });
+    }
 
-    // const handleSubmit = (event) =>{
-    //   event.preventDefault();
-    //   console.log(values);
-    //   Alert.fire({
-    //   title: titleConfirmacion,
-    //   text: msjConfirmacion,
-    //   confirmButtonText: "Aceptar",
-    //   cancelButtonText: "Cancelar",
-    //   showCancelButton: true,
-    //   reverseButtons: true,
-    //   showLoaderOnConfirm: true,
-    //   icon: "warning",
-    //   preConfirm: () => {
-    //     return axios({
-    //       url: "/category/",
-    //       method: "PUT",
-    //       data: JSON.stringify(values),
-    //     })
-    //       .then((response) => {
-    //         console.log(response);
-    //         if (!response.error) {
-    //           setCategories((categories) => [
-    //             ...categories.filter((it) => it.id !== values.id),
-    //             values,
-    //           ]);
-    //           handleCloseForm();
-    //           Alert.fire({
-    //             title: titleExito,
-    //             text: msjExito,
-    //             icon: "success",
-    //             confirmButtonText: "Aceptar",
-    //           });
-    //         }
-    //         return response;
-    //       })
-    //       .catch((error) => {
-    //         Alert.fire({
-    //           title: titleError,
-    //           confirmButtonColor: "#198754",
-    //           text: msjError,
-    //           icon: "error",
-    //           confirmButtonText: "Aceptar",
-    //         });
-    //       });
-    //   },
-    //   backdrop: true,
-    //   allowOutsideClick: !Alert.isLoading,
-    //   });
-    // };
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        const cliente = {
+            ...values
+        };
+        console.log(cliente);
+        Alert.fire({
+            title: titleConfirmacion,
+            text: msjConfirmacion,
+            confirmButtonText: "Aceptar",
+            cancelButtonText: "Cancelar",
+            showCancelButton: true,
+            reverseButtons: true,
+            showLoaderOnConfirm: true,
+            icon: "warning",
+            preConfirm: () => {
+                return axios({
+                    url: "/client/",
+                    method: "PUT",
+                    data: JSON.stringify(cliente),
+                })
+                    .then((response) => {
+                        console.log(response);
+                        if (!response.error) {
+                            handleCloseForm();
+                            getClients();
+                            handleCloseForm();
+                            Alert.fire({
+                                title: titleExito,
+                                text: msjExito,
+                                icon: "success",
+                                confirmButtonText: "Aceptar",
+                            });
+                        }
+                        return response;
+                    })
+                    .catch((error) => {
+                        Alert.fire({
+                            title: titleError,
+                            confirmButtonColor: "#198754",
+                            text: msjError,
+                            icon: "error",
+                            confirmButtonText: "Aceptar",
+                        });
+                    });
+            },
+            backdrop: true,
+            allowOutsideClick: !Alert.isLoading,
+        });
+    };
 
     const handleCloseForm = () => {
-        handleClose();
+        handleClose(false);
         setValues({});
     };
 
     useEffect(() => {
         setValues({
+            id: id,
+            status: status,
             phoneClient: phoneClient,
             emailClient: emailClient,
             nameRepre: nameRepre,
@@ -91,7 +106,7 @@ export const ClientEdit = ({
             phoneRepre: phoneRepre,
             emailRepre: emailRepre,
         });
-    }, [phoneClient, emailClient, nameRepre, surnameRepre, secondSurnameRepre, phoneRepre, emailRepre]);
+    }, [id, status, phoneClient, emailClient, nameRepre, surnameRepre, secondSurnameRepre, phoneRepre, emailRepre]);
 
     return (
         <>
@@ -100,14 +115,14 @@ export const ClientEdit = ({
                     <Modal.Title>Modificar datos del cliente</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <Form className="row">
+                    <Form className="row" onSubmit={handleSubmit}>
                         <Form.Group className="col-md-6" >
                             <Form.Label>Teléfono</Form.Label>
-                            <Form.Control type="tel" placeholder="7778895412" value={values.phoneClient}/>
+                            <Form.Control name="phoneClient" type="tel" placeholder="7778895412" value={values.phoneClient} onChange={handleChange} />
                         </Form.Group>
                         <Form.Group className="col-md-6" >
                             <Form.Label>Correo eléctronico</Form.Label>
-                            <Form.Control type="email" placeholder="Email" value={values.emailClient} />
+                            <Form.Control name="emailClient" type="email" placeholder="Email" value={values.emailClient} onChange={handleChange} />
                         </Form.Group>
                         <br />
                         <Form.Group className="md-12 topBottom" >
@@ -115,23 +130,23 @@ export const ClientEdit = ({
                         </Form.Group>
                         <Form.Group className="col-md-4" >
                             <Form.Label>Nombre</Form.Label>
-                            <Form.Control type="text" placeholder="María" value={values.nameRepre}/>
+                            <Form.Control name="nameRepre" type="text" placeholder="María" value={values.nameRepre} onChange={handleChange} />
                         </Form.Group>
                         <Form.Group className="col-md-4" >
                             <Form.Label>Primer apellido</Form.Label>
-                            <Form.Control type="text" placeholder="Valdez" value={values.surnameRepre} />
+                            <Form.Control name="surnameRepre" type="text" placeholder="Valdez" value={values.surnameRepre} onChange={handleChange} />
                         </Form.Group>
                         <Form.Group className="col-md-4" >
                             <Form.Label>Segundo apellido</Form.Label>
-                            <Form.Control type="text" placeholder="Díaz" value={values.secondSurnameRepre}/>
+                            <Form.Control name="secondSurnameRepre" type="text" placeholder="Díaz" value={values.secondSurnameRepre} onChange={handleChange} />
                         </Form.Group>
                         <Form.Group className="col-md-6" >
                             <Form.Label>Teléfono</Form.Label>
-                            <Form.Control type="tel" placeholder="Ejemplo: Díaz" value={values.phoneRepre}/>
+                            <Form.Control name="phoneRepre" type="tel" placeholder="" value={values.phoneRepre} onChange={handleChange} />
                         </Form.Group>
                         <Form.Group className="col-md-6" >
                             <Form.Label>Correo eléctronico</Form.Label>
-                            <Form.Control type="email" placeholder="Email" value={values.emailRepre}/>
+                            <Form.Control name="emailRepre" type="email" placeholder="Email" value={values.emailRepre} onChange={handleChange} />
                         </Form.Group>
 
                         <Form.Group className="mb-4 topBottom">
