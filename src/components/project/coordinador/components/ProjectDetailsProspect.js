@@ -64,6 +64,11 @@ export const ProjectDetailsProspect = ({
     });
   }, [isOpenDetailsP]);
 
+  if(project === null){
+    
+    project = "No aplica"
+  }
+
   return (
     <>
       <Modal show={isOpenDetailsP} onHide={handleCloseForm} size="lg">
@@ -111,7 +116,7 @@ export const ProjectDetailsProspect = ({
                       </Form.Group>
                       <Form.Group className="col-md-6 mb-6" >
                         <Form.Label>Estado del proyecto</Form.Label>
-                        <Form.Control name="statusProject" value={values.statusProject} onChange={handleChange} type="text" readOnly />
+                        <Form.Control name="statusProject" value={values.statusProject?.description} onChange={handleChange} type="text" readOnly />
                       </Form.Group>
                       <Form.Group className="col-md-12" >
                         <Form.Label>Descripción del proyecto</Form.Label>
@@ -146,7 +151,7 @@ export const ProjectDetailsProspect = ({
                   <Card.Body>
                     <div className="row">
                       <Form.Group className="col-md-6"  >
-                        <Form.Control name="" value={values.phoneClient} onChange={handleChange} type="text" readOnly />
+                        <Form.Control name="client" value={values.client?.name} onChange={handleChange} type="text" readOnly />
                       </Form.Group>
                     </div>
                   </Card.Body>
@@ -155,7 +160,7 @@ export const ProjectDetailsProspect = ({
             </Card>
             {/* COTIZACION */}
             <Card className="mb-3" bg="white">
-              <Card.Header onClick={() => setIsOpenClient(!isOpenCotizacion)}
+              <Card.Header onClick={() => setIsOpenCotizacion(!isOpenCotizacion)}
                 aria-controls="example-collapse-text"
                 aria-expanded={isOpenCotizacion}
                 type="button">
@@ -178,19 +183,19 @@ export const ProjectDetailsProspect = ({
                     <div className="row">
                     <Form.Group className="col-md-6" >
                         <Form.Label>Presupuesto</Form.Label>
-                        <Form.Control name="phoneClient" value={values.phoneClient} onChange={handleChange} type="text" readOnly />
+                        <Form.Control name="cotizacion" value={values.cotizacion} onChange={handleChange} type="text" readOnly />
                       </Form.Group>
                       <Form.Group className="col-md-6" >
                         <Form.Label>Precio al cliente</Form.Label>
-                        <Form.Control name="phoneClient" value={values.phoneClient} onChange={handleChange} type="text" readOnly />
+                        <Form.Control name="priceClient" value={values.priceClient} onChange={handleChange} type="text" readOnly />
                       </Form.Group>
                       <Form.Group className="col-md-6" >
                         <Form.Label>Tiempo estimado (meses)</Form.Label>
-                        <Form.Control name="phoneClient" value={values.phoneClient} onChange={handleChange} type="text" readOnly />
+                        <Form.Control name="months" value={values.months} onChange={handleChange} type="text" readOnly />
                       </Form.Group>
                       <Form.Group className="col-md-6" >
                         <Form.Label>Cantidad de becarios</Form.Label>
-                        <Form.Control name="phoneClient" value={values.phoneClient} onChange={handleChange} type="text" readOnly />
+                        <Form.Control name="numberBeca" value={values.numberBeca} onChange={handleChange} type="text" readOnly />
                       </Form.Group>
                     </div>
                   </Card.Body>

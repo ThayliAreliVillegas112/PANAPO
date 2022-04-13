@@ -559,7 +559,7 @@ export const ProjectList = () => {
                                             progressComponent={<CustomLoader />}
                                         />
                                         <ProjectEditProspect
-                                            isOpenUpdate={isOpenUpdateP}
+                                            isOpenUpdateP={isOpenUpdateP}
                                             handleClose={setIsOpenUpdateP}
                                             setProjectsProspect={setProjectsProspect}
                                             {...values}
