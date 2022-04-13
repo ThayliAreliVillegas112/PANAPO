@@ -37,6 +37,8 @@ export const UserList = ({ handleClose }) => {
         getRol();
     }, []);
 
+
+
     const getPerson = () => {
         axios({ url: "/person/", method: "GET" })
             .then((response) => {
@@ -63,8 +65,9 @@ export const UserList = ({ handleClose }) => {
     const getUser = () => {
         axios({ url: "/user/", method: "GET" })
             .then((response) => {
-                console.log(response);
-                setUsers(response.data);
+                let data = response.data;
+                let directivesTemp = data.filter(item => item.person.profession.description !== "Directivo")
+                setUsers(directivesTemp);
                 setIsLoading(false);
             })
             .catch((error) => {
@@ -77,7 +80,7 @@ export const UserList = ({ handleClose }) => {
         const getEmailId = event.target.value;
         console.log(getEmailId);
     }
-    
+
     const columns = [
         {
             name: <h6 >#</h6>,
@@ -85,8 +88,8 @@ export const UserList = ({ handleClose }) => {
             width: "4%"
         },
         {
-            name: <h6 className="text-center">Nombre de Usuario</h6>,
-            cell: (row) => <div className="txt4">{row.username + " "}</div>,
+            name: <h6 className="text-center">Nombre del Usuario</h6>,
+            cell: (row) => <div className="txt4">{row.person.name + " "}</div>,
         },
         {
             name: (
@@ -151,63 +154,63 @@ export const UserList = ({ handleClose }) => {
 
     const statusChange = (users) => {
         Alert.fire({
-          title: titleConfirmacion,
-          text: msjConfirmacion,
-          confirmButtonText: "Aceptar",
-          cancelButtonText: "Cancelar",
-          confirmButtonColor: "#198754",
-          cancelButtonColor: "#dc3545",
-          showCancelButton: true,
-          reverseButtons: true,
-          showLoaderOnConfirm: true,
-          icon: "warning",
-          backdrop: true,
-          allowOutsideClick: !Alert.isLoading,
-          preConfirm: () => {
-            let personalUpdate = {};
-            if (users.status.description === 'Activo') {
-                personalUpdate = {
-                ...users,
-                status: { id: 2 }
-              };
-            } else {
-                personalUpdate = {
-                ...users,
-                status: { id: 1 }
-              };
-            }
-            return axios({
-              url: "/user/",
-              method: 'PUT',
-              data: JSON.stringify(personalUpdate)
-            })
-              .then((response => {
-                if (!response.error) { 
-                  getUser();
-                  Alert.fire({
-                    title: titleExito,
-                    text: msjExito,
-                    icon: "success",
-                    confirmButtonText: "Aceptar",
-                    confirmButtonColor: "#198754",
-                  });
+            title: titleConfirmacion,
+            text: msjConfirmacion,
+            confirmButtonText: "Aceptar",
+            cancelButtonText: "Cancelar",
+            confirmButtonColor: "#198754",
+            cancelButtonColor: "#dc3545",
+            showCancelButton: true,
+            reverseButtons: true,
+            showLoaderOnConfirm: true,
+            icon: "warning",
+            backdrop: true,
+            allowOutsideClick: !Alert.isLoading,
+            preConfirm: () => {
+                let personalUpdate = {};
+                if (users.status.description === 'Activo') {
+                    personalUpdate = {
+                        ...users,
+                        status: { id: 2 }
+                    };
                 } else {
-                  Alert.fire({
-                    title: titleError,
-                    text: msjError,
-                    icon: "error",
-                    confirmButtonText: "Aceptar",
-                    confirmButtonColor: "#198754",
-                  });
+                    personalUpdate = {
+                        ...users,
+                        status: { id: 1 }
+                    };
                 }
-                return response;
-              }))
-              .catch((error) => {
-                console.log(error);
-              })
-          }
+                return axios({
+                    url: "/user/",
+                    method: 'PUT',
+                    data: JSON.stringify(personalUpdate)
+                })
+                    .then((response => {
+                        if (!response.error) {
+                            getUser();
+                            Alert.fire({
+                                title: titleExito,
+                                text: msjExito,
+                                icon: "success",
+                                confirmButtonText: "Aceptar",
+                                confirmButtonColor: "#198754",
+                            });
+                        } else {
+                            Alert.fire({
+                                title: titleError,
+                                text: msjError,
+                                icon: "error",
+                                confirmButtonText: "Aceptar",
+                                confirmButtonColor: "#198754",
+                            });
+                        }
+                        return response;
+                    }))
+                    .catch((error) => {
+                        console.log(error);
+                    })
+            }
         });
-      }
+    }
 
     const paginationOptions = {
         rowsPerPageText: "Filas por página",
@@ -231,13 +234,11 @@ export const UserList = ({ handleClose }) => {
 
     const formik = useFormik({
         initialValues: {
-            username: "",
-            person: "",
-            status: 1,
+            email: "",
             authorities: "",
         },
         validationSchema: yup.object().shape({
-            username: yup
+            email: yup
                 .string()
                 .required("Campo obligatorio"),
             authorities: yup
@@ -246,17 +247,27 @@ export const UserList = ({ handleClose }) => {
 
         }),
         onSubmit: (values) => {
-            const person = {
-                ...values,
-                person: {
-                    id: values.id,
-                },
+            const person2 = {
+                password: values.email,
+                // person: {
+                //     name: values.name,
+                //     surname: values.surname,
+                //     secondSurname: values.secondSurname,
+                //     email: values.email,
+                //     profession: values.profession,
+                //     status: {
+                //         id: 1,
+                //         description: "Activo"
+                //     }
+                // },
+                authorities: values.authorities,
                 status: {
-                    id: values.status
-                },
+                    id: 1,
+                    description: "Activo"
+                }
 
             };
-            console.log(person)
+            console.log(person2)
             Alert.fire({
                 title: titleConfirmacion,
                 text: msjConfirmacion,
@@ -269,7 +280,7 @@ export const UserList = ({ handleClose }) => {
                 showLoaderOnConfirm: true,
                 icon: "warning",
                 preConfirm: () => {
-                    return axios({ url: "/user/", method: "POST", data: JSON.stringify(person) })
+                    return axios({ url: "/user/", method: "POST", data: JSON.stringify(person2) })
                         .then((response) => {
                             console.log(response)
                             if (!response.error) {
@@ -365,14 +376,8 @@ export const UserList = ({ handleClose }) => {
                                                 </Form.Group>
                                                 <Form.Group className="col-md-6 mb-4" >
                                                     <Form.Label>Correo</Form.Label>
-                                                    {/* <Form.Select aria-label="Default select example">
-                                                        {person.map((item)=> (
-                                                            <option key={item.id} value={item.id} >{item.person.email}</option>
-                                                        ))}
-                                                    </Form.Select>
-                                                    <Select options={getPerson}></Select> */}
-
-                                                    <Form.Select name="username" value={formik.values.username} onChange={formik.handleChange}>
+                                                    
+                                                    <Form.Select name="email" value={formik.values.email} onChange={formik.handleChange}>
                                                         <option>Seleccione una opción</option>
                                                         {
                                                             person1.map((personemail) => (
@@ -380,8 +385,8 @@ export const UserList = ({ handleClose }) => {
                                                             ))
                                                         }
                                                     </Form.Select>
-                                                    {formik.errors.username ? (
-                                                        <span className="error-text">{formik.errors.username}</span>
+                                                    {formik.errors.email ? (
+                                                        <span className="error-text">{formik.errors.email}</span>
                                                     ) : null}
                                                 </Form.Group>
                                                 <br />

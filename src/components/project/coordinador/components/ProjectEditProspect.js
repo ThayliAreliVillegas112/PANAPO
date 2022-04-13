@@ -90,6 +90,7 @@ export const ProjectEditProspect = ({
         </Modal.Header>
         <Modal.Body>
             {/* DATOS DEL PROYECTO */}
+            <Form> 
             <Card className="mb-3" bg="white">
               <Card.Header onClick={() => setIsOpenData(!isOpenData)}
                 aria-controls="example-collapse-text"
@@ -202,6 +203,7 @@ export const ProjectEditProspect = ({
                 </Col>
               </Row>
             </Form.Group>
+            </Form>
         </Modal.Body>
       </Modal>
     </>

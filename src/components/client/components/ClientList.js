@@ -327,8 +327,8 @@ export const ClientList = () => {
                                                                             value={formik.values.typeClient}
                                                                             onChange={formik.handleChange}>
                                                                             <option value="">Seleccione una opción</option>
-                                                                            <option value="1">Interno</option>
-                                                                            <option value="2">Externo</option>
+                                                                            <option value="2">Interno</option>
+                                                                            <option value="1">Externo</option>
                                                                         </Form.Select>
                                                                         {formik.errors.typeClient ? (
                                                                             <span className='error-text'>{formik.errors.typeClient}</span>

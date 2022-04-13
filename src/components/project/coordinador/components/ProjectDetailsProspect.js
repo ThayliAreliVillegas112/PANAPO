@@ -1,105 +1,202 @@
 import React, { useEffect, useState } from "react";
-import { Button, Col, Form, Modal, Row } from "react-bootstrap";
+import { Button, Row, Col, Container, Form, Collapse, Card, Modal } from "react-bootstrap";
 import FeatherIcon from "feather-icons-react";
 import Alert, { msjConfirmacion, titleConfirmacion, titleError, msjError, msjExito, titleExito } from "../../../../shared/plugins/alert";
 import axios from "../../../../shared/plugins/axios";
 
-export const ProjectDetailsProspect = ({ 
-    isOpenDetails, 
-  handleClose, 
-  setProjectsProspect, 
+export const ProjectDetailsProspect = ({
+  isOpenDetailsP,
+  handleClose,
+  id,
+  cotizacion,
+  description,
+  months,
   name,
+  numberBeca,
+  client,
+  project,
+  statusProject,
+  priceClient,
   status
 }) => {
 
-    const [values, setValues] = useState({name: name, status: status});
+  const [values, setValues] = useState({
+    id: id,
+    cotizacion: cotizacion,
+    description: description,
+    months: months,
+    name: name,
+    numberBeca: numberBeca,
+    client: client,
+    project: project,
+    statusProject: statusProject,
+    priceClient: priceClient,
+    status: status
+  });
 
-    // const handleChange = (event) =>{
-    //   const { name, value } = event.target;
-    //   setValues({ ...values, [name]: value});
-    // }  
+  const [isOpenData, setIsOpenData] = useState(true);
+  const [isOpenClient, setIsOpenClient] = useState(true);
+  const [isOpenCotizacion, setIsOpenCotizacion] = useState(true);
 
-    // const handleSubmit = (event) =>{
-    //   event.preventDefault();
-    //   console.log(values);
-    //   Alert.fire({
-    //   title: titleConfirmacion,
-    //   text: msjConfirmacion,
-    //   confirmButtonText: "Aceptar",
-    //   cancelButtonText: "Cancelar",
-    //   showCancelButton: true,
-    //   reverseButtons: true,
-    //   showLoaderOnConfirm: true,
-    //   icon: "warning",
-    //   preConfirm: () => {
-    //     return axios({
-    //       url: "/category/",
-    //       method: "PUT",
-    //       data: JSON.stringify(values),
-    //     })
-    //       .then((response) => {
-    //         console.log(response);
-    //         if (!response.error) {
-    //           setCategories((categories) => [
-    //             ...categories.filter((it) => it.id !== values.id),
-    //             values,
-    //           ]);
-    //           handleCloseForm();
-    //           Alert.fire({
-    //             title: titleExito,
-    //             text: msjExito,
-    //             icon: "success",
-    //             confirmButtonText: "Aceptar",
-    //           });
-    //         }
-    //         return response;
-    //       })
-    //       .catch((error) => {
-    //         Alert.fire({
-    //           title: titleError,
-    //           confirmButtonColor: "#198754",
-    //           text: msjError,
-    //           icon: "error",
-    //           confirmButtonText: "Aceptar",
-    //         });
-    //       });
-    //   },
-    //   backdrop: true,
-    //   allowOutsideClick: !Alert.isLoading,
-    //   });
-    // };
 
-    const handleCloseForm = () =>{
-      handleClose();
-      setValues({});
-    };
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setValues({ ...values, [name]: value });
+  }
 
-    useEffect(() => {
-      setValues({
-        name: name
-      });
-    }, [name]);
-  
-    return (
-      <>
-      <Modal show={isOpenDetails} onHide={handleCloseForm}>
+  const handleCloseForm = () => {
+    handleClose(false);
+    setValues({});
+  };
+  useEffect(() => {
+    setValues({
+      id: id,
+      cotizacion: cotizacion,
+      description: description,
+      months: months,
+      name: name,
+      numberBeca: numberBeca,
+      client: client,
+      project: project,
+      statusProject: statusProject,
+      priceClient: priceClient,
+      status: status
+    });
+  }, [isOpenDetailsP]);
+
+  return (
+    <>
+      <Modal show={isOpenDetailsP} onHide={handleCloseForm} size="lg">
         <Modal.Header closeButton className="backgroundHeadModal" closeVariant="white">
           <Modal.Title>Detalles del proyecto prospecto</Modal.Title>
         </Modal.Header>
         <Modal.Body>
+          {/* DATOS DEL PROYECTO */}
           <Form>
-            <Form.Group className="mb-4">
-              <Form.Label className="form-label">Nombre</Form.Label>
-              <Form.Control
-                name="name"
-                placeholder="Nombre del proyecto"
-                value={values.name}
-                readOnly
-              />
-              {/* {formik.errors.description ? (
-                <span className="error-text">{formik.errors.description}</span>
-              ) : null} */}
-            </Form.Group>
+            <Card className="mb-3" bg="white">
+              <Card.Header onClick={() => setIsOpenData(!isOpenData)}
+                aria-controls="example-collapse-text"
+                aria-expanded={isOpenData}
+                type="button">
+                <Row>
+                  <Col as="h6" className="text-bold">Datos del proyecto</Col>
+                  <Col className="text-end">
+                    <Col>
+                      {isOpenData ? (
+                        <FeatherIcon icon="minus"
+                          color="grey" />
+                      ) : (
+                        <FeatherIcon icon="plus"
+                          color="grey" />
+                      )}
+                    </Col>
+                  </Col>
+                </Row>
+              </Card.Header>
+              <Collapse in={isOpenData}>
+                <div id="example-collapse-text">
+                  <Card.Body>
+                    <div className="row">
+                      <Form.Group className="col-md-6" >
+                        <Form.Label>Proyecto anterior</Form.Label>
+                        <Form.Control name="project" value={values.project} onChange={handleChange} type="text" readOnly />
+                      </Form.Group>
+                      <Form.Group className="col-md-6" >
+                        <Form.Label>Ciclo del proyecto</Form.Label>
+                        <Form.Control name=""  onChange={handleChange} type="text" placeholder="0" readOnly />
+                      </Form.Group>
+                      <Form.Group className="col-md-6" >
+                        <Form.Label>Identificador</Form.Label>
+                        <Form.Control name="name" value={values.name} onChange={handleChange} type="text" readOnly />
+                      </Form.Group>
+                      <Form.Group className="col-md-6 mb-6" >
+                        <Form.Label>Estado del proyecto</Form.Label>
+                        <Form.Control name="statusProject" value={values.statusProject} onChange={handleChange} type="text" readOnly />
+                      </Form.Group>
+                      <Form.Group className="col-md-12" >
+                        <Form.Label>Descripción del proyecto</Form.Label>
+                        <Form.Control name="description" value={values.description} onChange={handleChange} as="textarea" readOnly />
+                      </Form.Group>
+                    </div>
+                  </Card.Body>
+                </div>
+              </Collapse>
+            </Card>
+            {/* DATOS DEL CLIENTE */}
+            <Card className="mb-3" bg="white">
+              <Card.Header onClick={() => setIsOpenClient(!isOpenClient)}
+                aria-controls="example-collapse-text"
+                aria-expanded={isOpenClient}
+                type="button">
+                <Row>
+                  <Col as="h6" className="text-bold">Cliente</Col>
+                  <Col className="text-end">
+                    <Col>
+                      {isOpenClient ? (
+                        <FeatherIcon icon="minus" color="grey" />
+                      ) : (
+                        <FeatherIcon icon="plus" color="grey" />
+                      )}
+                    </Col>
+                  </Col>
+                </Row>
+              </Card.Header>
+              <Collapse in={isOpenClient}>
+                <div id="example-collapse-text">
+                  <Card.Body>
+                    <div className="row">
+                      <Form.Group className="col-md-6"  >
+                        <Form.Control name="" value={values.phoneClient} onChange={handleChange} type="text" readOnly />
+                      </Form.Group>
+                    </div>
+                  </Card.Body>
+                </div>
+              </Collapse>
+            </Card>
+            {/* COTIZACION */}
+            <Card className="mb-3" bg="white">
+              <Card.Header onClick={() => setIsOpenClient(!isOpenCotizacion)}
+                aria-controls="example-collapse-text"
+                aria-expanded={isOpenCotizacion}
+                type="button">
+                <Row>
+                  <Col as="h6" className="text-bold">Cotización</Col>
+                  <Col className="text-end">
+                    <Col>
+                      {isOpenClient ? (
+                        <FeatherIcon icon="minus" color="grey" />
+                      ) : (
+                        <FeatherIcon icon="plus" color="grey" />
+                      )}
+                    </Col>
+                  </Col>
+                </Row>
+              </Card.Header>
+              <Collapse in={isOpenCotizacion}>
+                <div id="example-collapse-text">
+                  <Card.Body>
+                    <div className="row">
+                    <Form.Group className="col-md-6" >
+                        <Form.Label>Presupuesto</Form.Label>
+                        <Form.Control name="phoneClient" value={values.phoneClient} onChange={handleChange} type="text" readOnly />
+                      </Form.Group>
+                      <Form.Group className="col-md-6" >
+                        <Form.Label>Precio al cliente</Form.Label>
+                        <Form.Control name="phoneClient" value={values.phoneClient} onChange={handleChange} type="text" readOnly />
+                      </Form.Group>
+                      <Form.Group className="col-md-6" >
+                        <Form.Label>Tiempo estimado (meses)</Form.Label>
+                        <Form.Control name="phoneClient" value={values.phoneClient} onChange={handleChange} type="text" readOnly />
+                      </Form.Group>
+                      <Form.Group className="col-md-6" >
+                        <Form.Label>Cantidad de becarios</Form.Label>
+                        <Form.Control name="phoneClient" value={values.phoneClient} onChange={handleChange} type="text" readOnly />
+                      </Form.Group>
+                    </div>
+                  </Card.Body>
+                </div>
+              </Collapse>
+            </Card>
             <Form.Group className="mb-4">
               <Row>
                 <Col className="text-end">
@@ -112,6 +209,6 @@ export const ProjectDetailsProspect = ({
           </Form>
         </Modal.Body>
       </Modal>
-      </>
-    );
-  };
+    </>
+  );
+};

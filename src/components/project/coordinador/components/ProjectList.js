@@ -14,6 +14,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import "../../../../assets/css/main.css";
 import "../../../../assets/css/util.css";
 import "bootstrap/dist/css/bootstrap.min.css";
+import * as yup from "yup";
+import axios from "../../../../shared/plugins/axios";
+import { useFormik } from "formik";
 
 export const ProjectList = () => {
 
@@ -52,8 +55,24 @@ export const ProjectList = () => {
     useEffect(() => {
         setIsLoading(true);
         getProjects();
-        getProjectsProspect();
+        getProspectProject();
     }, []);
+
+    const getProspectProject = () => {
+        axios({ url: "/project/", method: "GET" })
+            .then((response) => {
+                let data = response.data;
+                let prospectTemp = data.filter(item => item.statusProject.description === "Prospecto")
+                setProjectsProspect(prospectTemp);
+                setIsLoading(false);
+                
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    };
+
+    
 
     let project = [
         {
@@ -86,22 +105,10 @@ export const ProjectList = () => {
         }
     ];
 
-    let projectProspect = [
-        {
-            "name": "SIGEH",
-            "client": "Miriam",
-            "time": 3,
-            "becarios": 4,
-            "status": "prospecto"
-        },
-        {
-            "name": "TREMANTRA",
-            "client": "Isa",
-            "time": 5,
-            "becarios": 3,
-            "status": "prospecto"
-        }
-    ];
+    // const handleCloseForm = () => {
+    //     formik.resetForm();
+    //     setIsOpen(false);
+    // };
 
     const columns = [
         {
@@ -228,22 +235,22 @@ export const ProjectList = () => {
         },
         {
             name: <h6 style={{ width: "100%" }}>Cliente</h6>,
-            cell: (row) => <div className="txt4">{row.client}</div>,
+            cell: (row) => <div className="txt4">{row.client.name}</div>,
         },
         {
             name: <h6 style={{ width: "100%" }}>Tiempo estimado</h6>,
-            cell: (row) => <div className="txt4">{row.time}</div>,
+            cell: (row) => <div className="txt4">{row.months}</div>,
         },
         {
             name: <h6 style={{ width: "100%" }}>Cantidad de becarios</h6>,
-            cell: (row) => <div className="txt4">{row.becarios}</div>,
+            cell: (row) => <div className="txt4">{row.numberBeca}</div>,
         },
         {
             name: <h6>Estado</h6>,
             cell: (row) =>
                 <h6>
                     <Badge bg="secondary">
-                        <div>{row.status}</div>
+                        <div>{row.statusProject.description}</div>
                     </Badge>
                 </h6>
         },
@@ -290,10 +297,7 @@ export const ProjectList = () => {
         setIsLoading(false);
     };
 
-    const getProjectsProspect = () => {
-        setProjectsProspect(projectProspect);
-        setIsLoadingProspect(false);
-    };
+    
 
     const paginationOptions = {
         rowsPerPageText: "Filas por página",
@@ -547,7 +551,7 @@ export const ProjectList = () => {
                                     <Card.Body>
                                         <DataTable
                                             columns={columnsP}
-                                            data={projectProspect}
+                                            data={projectsProspect}
                                             noDataComponent="No hay registros"
                                             pagination
                                             paginationComponentOptions={paginationOptions}
@@ -556,20 +560,19 @@ export const ProjectList = () => {
                                         />
                                         <ProjectEditProspect
                                             isOpenUpdate={isOpenUpdateP}
-                                            handleClose={() => setIsOpenUpdateP(false)}
-                                            setProjects={setProjectsProspect}
+                                            handleClose={setIsOpenUpdateP}
+                                            setProjectsProspect={setProjectsProspect}
                                             {...values}
                                         />
                                         <ProjectDetailsProspect
-                                            isOpenDetails={isOpenDetailsP}
-                                            handleClose={() => setIsOpenDetailsP(false)}
-                                            setProjects={setProjectsProspect}
+                                            isOpenDetailsP={isOpenDetailsP}
+                                            handleClose={setIsOpenDetailsP}
                                             {...values}
                                         />
                                         <ProjectStart
                                             isOpenStart={isOpenStart}
-                                            handleClose={() => setIsOpenStart(false)}
-                                            setProjects={setProjectsProspect}
+                                            handleClose={setIsOpenStart}
+                                            setProjectsProspect={setProjectsProspect}
                                             {...values}
                                         />
                                     </Card.Body>
