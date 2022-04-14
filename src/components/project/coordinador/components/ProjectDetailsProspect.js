@@ -104,7 +104,7 @@ export const ProjectDetailsProspect = ({
                     <div className="row">
                       <Form.Group className="col-md-6" >
                         <Form.Label>Proyecto anterior</Form.Label>
-                        <Form.Control name="project" value={values.project} onChange={handleChange} type="text" readOnly />
+                        <Form.Control name="project" value={values.project?.name} onChange={handleChange} type="text" readOnly />
                       </Form.Group>
                       <Form.Group className="col-md-6" >
                         <Form.Label>Ciclo del proyecto</Form.Label>
