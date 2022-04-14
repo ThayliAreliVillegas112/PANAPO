@@ -61,27 +61,27 @@ export const ProjectEditProspect = ({
       priceClient: "",
     },
     validationSchema: yup.object().shape({
-      cotizacion: yup.string().required("Campo obligatorio"),
+      cotizacion: yup.number().required("Campo obligatorio"),
       description: yup.string().required("Campo obligatorio"),
       months: yup.number().required("Campo obligatorio"),
       name: yup.string().required("Campo obligatorio"),
-      numberBeca: yup.string().required("Campo obligatorio"),
-      client: yup.number().required("Campo obligatorio"),
-      project: yup.string().required("Campo obligatorio"),
+      numberBeca: yup.number().required("Campo obligatorio"),
+      client: yup.string(),
+      project: yup.string().nullable(),
       priceClient: yup.number().required("Campo obligatorio"),
     }),
     onSubmit: (valuesFormik) => {
       if (valuesFormik.project !== "" && valuesFormik.project !== 0) {
+
         const prospect = {
           ...valuesFormik,
           id: id,
           client: {
-            id: values.client,
+            id: parseInt(valuesFormik.client),
           },
           project: {
-            id: values.project
-          }
-
+              id: parseInt(valuesFormik.project),
+          }  
         };
         console.log(prospect);
         Alert.fire({
@@ -127,15 +127,18 @@ export const ProjectEditProspect = ({
           allowOutsideClick: !Alert.isLoading,
         });
       } else if (valuesFormik.project === "" && valuesFormik.project === 0) {
+        if(valuesFormik.project === null){
+          project = "No aplica"
+        }
         const prospect = {
           ...valuesFormik,
           id: id,
           client: {
-            id: values.client,
+            id: parseInt(valuesFormik.client),
           },
-          statusProject: {
-            id: 1
-          },
+          // project: {
+          //     id: parseInt(valuesFormik.project),
+          // }  
         };
         console.log(prospect);
         Alert.fire({
@@ -195,13 +198,14 @@ export const ProjectEditProspect = ({
         .catch((error) => {
             console.log(error);
         });
-};
+  };
 
+  
   const getProjects = () => {
     axios({ url: "/project/", method: "GET" })
       .then((response) => {
         let data = response.data;
-        let prospectTemp = data.filter(item => item.statusProject.description !== "Prospecto")
+        let prospectTemp = data.filter(item => item.statusProject.description === "Cancelado" || item.statusProject.description === "Cerrado")
         setProjectsProspect(prospectTemp);
         setIsLoading(false);
 
@@ -241,6 +245,8 @@ export const ProjectEditProspect = ({
     formikModify.values.statusProject = statusProject;
     formikModify.values.priceClient = priceClient;
     getProjects();
+    
+  
     getClients();
   }, [isOpenUpdateP]);
 
@@ -248,7 +254,7 @@ export const ProjectEditProspect = ({
     <>
       <Modal show={isOpenUpdateP} onHide={handleCloseForm} size="lg">
         <Modal.Header closeButton className="backgroundHeadModal" closeVariant="white">
-          <Modal.Title>Detalles del proyecto prospecto</Modal.Title>
+          <Modal.Title>Modificar datos del proyecto prospecto</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {/* DATOS DEL PROYECTO */}
@@ -283,7 +289,7 @@ export const ProjectEditProspect = ({
                           <option>Seleccione una opción</option>
                           {
                             projectsProspect.map((proyectos) => (
-                              <option key={proyectos.id} value={proyectos.id}>{proyectos.acronym}</option>
+                              <option key={proyectos.id} value={proyectos.id} >{proyectos.acronym}</option>
                             ))
                           }
                         </Form.Select>
@@ -304,7 +310,7 @@ export const ProjectEditProspect = ({
                       </Form.Group>
                       <Form.Group className="col-md-6 mb-6" >
                         <Form.Label>Estado del proyecto</Form.Label>
-                        <Form.Control name="statusProject" value={formikModify.values.statusProject?.description} onChange={formikModify.handleChange} type="text" />
+                        <Form.Control name="statusProject" value={formikModify.values.statusProject?.description} onChange={formikModify.handleChange} type="text" disabled />
                         {formikModify.errors.statusProject ? (
                           <span className='text-danger'>{formikModify.errors.statusProject}</span>
                         ) : null}
@@ -345,11 +351,11 @@ export const ProjectEditProspect = ({
                   <Card.Body>
                     <div className="row">
                       <Form.Group className="col-md-6"  >
-                      <Form.Select name="client" value={formikModify.values.client} onChange={formikModify.handleChange}>
+                      <Form.Select name="client"  value={formikModify.values.client} onChange={formikModify.handleChange}>
                           <option>Seleccione una opción</option>
                           {
                             clients.map((cliente) => (
-                              <option key={cliente.id} value={cliente.id}>{cliente.name}</option>
+                              <option key={cliente.id}  value={cliente.id}>{cliente.name+ " "+ cliente.surname+" "+cliente.secondSurname}</option>
                             ))
                           }
                         </Form.Select>
