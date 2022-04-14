@@ -255,3 +255,92 @@ export const PersonalEdit = ({
         </>
     );
 };
+
+
+
+
+
+// -------------------------------------------------------
+
+// const formik = useFormik({
+//     initialValues: {
+//       acronym: "",
+//       statusProject: 2,
+//       priority: "",
+//       dateStart: "",
+//       dateEnd: "",
+
+//     },
+//     validationSchema: yup.object().shape({
+//       acronym: yup.string().required("Campo obligatorio"),
+//       statusProject: yup.string().required("Campo obligatorio"),
+//       priority: yup.string().required("Campo obligatorio"),
+//       dateStart: yup.string().email("Ingresa un correo correcto").required("Campo obligatorio"),
+//       dateEnd: yup.string().required("Campo obligatorio"),
+//     }),
+//     onSubmit: (values) => {
+//       const projectStart = {
+//         ...values,
+//         statusProject: {
+//           id: parseInt(values.statusProject)
+//         },
+//       };
+//       console.log(projectStart);
+//       Alert.fire({
+//         title: titleConfirmacion,
+//         text: msjConfirmacion,
+//         confirmButtonText: "Aceptar",
+//         cancelButtonText: "Cancelar",
+//         confirmButtonColor: "#198754",
+//         cancelButtonColor: "#dc3545",
+//         showCancelButton: true,
+//         reverseButtons: true,
+//         showLoaderOnConfirm: true,
+//         icon: "warning",
+//         preConfirm: () => {
+//           return axios({ url: "/project/", method: "POST", data: JSON.stringify(projectStart) })
+//             .then((response) => {
+//               if (!response.error) {
+//                 getProspectProject();
+//                 Alert.fire({
+//                   title: titleExito,
+//                   text: msjExito,
+//                   confirmButtonColor: "#198754",
+//                   icon: "success",
+//                   confirmButtonText: "Aceptar",
+//                 }).then((result) => {
+//                   if (result.isConfirmed) {
+//                     handleCloseForm();
+//                   }
+//                 });
+//               }
+//               return response;
+//             }).catch((error) => {
+//               console.log(error)
+//               Alert.fire({
+//                 title: titleError,
+//                 text: msjError,
+//                 cancelButtonColor: "#198754",
+//                 icon: "error",
+//                 confirmButtonText: "Aceptar"
+//               });
+//             });
+//         },
+//         backdrop: true,
+//         allowOutsideClick: !Alert.isLoading
+//       });
+//     },
+//   });
+
+//   setValues({
+//     id: id,
+//     cotizacion: cotizacion,
+//     description: description,
+//     months: months,
+//     name: name,
+//     numberBeca: numberBeca,
+//     client: client,
+//     project :project,
+//     statusProject: statusProject,
+//     priceClient: priceClient,
+//   })

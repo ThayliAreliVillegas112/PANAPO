@@ -1,7 +1,7 @@
 import React, { useContext, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from './authContext';
-import Alert from "../../shared/plugins/alert"
+import Alert, { msjConfirmacion, titleConfirmacion, titleError, msjError, msjExito, titleExito } from "../../shared/plugins/alert";
 import axios from "../../shared/plugins/axios";
 import { useFormik } from 'formik';
 import * as yup from "yup";
@@ -16,86 +16,164 @@ export const RecoverPassword = () => {
     const navigation = useNavigate();
     const { dispatch } = useContext(AuthContext);
 
+    useEffect(() => {
+        document.title = "PANAPO | Recuperar contraseña";
+    }, []);
+
+    const formik = useFormik({
+        initialValues: {
+            password: "",
+            confirmPassword: "",
+            code: ""
+        },
+        validationSchema: yup.object().shape({
+            password: yup.string().required("Campo obligatorio"),
+            confirmPassword: yup.string().required("Campo obligatorio"),
+            code: yup.string().required("Campo obligatorio"),
+        }),
+        onSubmit: (values) => {
+            console.log(values);
+            if (values.password !== values.confirmPassword) {
+                Alert.fire({
+                    title: "Verifique los datos",
+                    text: "Las contraseñas no coinciden",
+                    icon: "error",
+                    confirmButtonText: "Aceptar",
+                    confirmButtonColor: "#3085D6",
+                });
+            } else {
+                Alert.fire({
+                    title: titleConfirmacion,
+                    text: msjConfirmacion,
+                    confirmButtonText: "Aceptar",
+                    cancelButtonText: "Cancelar",
+                    confirmButtonColor: "#198754",
+                    cancelButtonColor: "#dc3545",
+                    showCancelButton: true,
+                    reverseButtons: true,
+                    showLoaderOnConfirm: true,
+                    icon: "warning",
+                    preConfirm: () => {
+                        return axios({ url: "/user/confir/", method: "POST", data: JSON.stringify(values) })
+                            .then((response) => {
+                                if (!response.error) {
+                                    Alert.fire({
+                                        title: "Cambio de contraseña exitoso",
+                                        text: "Se ha cambiado la contraseña correctamente ahora puede iniciar sesión",
+                                        confirmButtonColor: "#198754",
+                                        icon: "success",
+                                        confirmButtonText: "Aceptar",
+                                    }).then((result) => {
+                                        if (result.isConfirmed) {
+                                            handleCloseForm();
+                                        }
+                                        navigation("/");
+                                    });
+                                }
+                                return response;
+                            }).catch((error) => {
+                                console.log(error)
+                                Alert.fire({
+                                    title: titleError,
+                                    text: msjError,
+                                    cancelButtonColor: "#198754",
+                                    icon: "error",
+                                    confirmButtonText: "Aceptar"
+                                });
+                            });
+                    },
+                    backdrop: true,
+                    allowOutsideClick: !Alert.isLoading
+                });
+            }
+
+        },
+    });
+
+    const handleCloseForm = () => {
+        formik.resetForm();
+    };
+
     return (
         <header className="App-header">
-            <Container class="py-5 h-100">
+            <Container className="py-5 h-100">
                 <Row className='d-flex justify-content-center align-items-center h-100'>
-                    <Card style={{ width: "22rem"}}>
+                    <Card style={{ width: "22rem" }}>
                         <div className='text-center'>
-                            <Card.Img 
+                            <Card.Img
                                 variant="top"
-                                style={{ 
-                                        width: "60%",
-                                    }}
+                                style={{
+                                    width: "60%",
+                                }}
                                 className="rounded"
-                                alt="logo-cds" 
+                                alt="logo-cds"
                                 src={img}
                             />
                         </div>
-                        <hr/>
+                        <hr />
                         <Card.Body>
                             <Card.Text>
                                 <div className='text-center'>
                                     <p>Ingresa el código que llegó a tu correo electrónico</p>
                                 </div>
-                            <Form onSubmit={console.log("HOLA")}>
-                                <FormGroup>
-                                    <InputGroup className='mb-3'>
+                                <Form onSubmit={formik.handleSubmit}>
+                                    <FormGroup>
+                                        <InputGroup className='mb-3'>
                                             <FormControl
                                                 id="code"
-                                                type="email"
+                                                type="number"
                                                 placeholder='Código'
                                                 aria-label='Code...'
                                                 autoComplete='off'
-                                                name='code'
+                                                name='code' value={formik.values.code} onChange={formik.handleChange}
                                             />
-                                           
-                                                <InputGroup.Text>
-                                                    <FeatherIcon icon="mail"/>
-                                                </InputGroup.Text>
-                                    </InputGroup>
-                                </FormGroup>
-                                <div className='text-center'>
-                                    <p>Ingrese su nueva contraseña en los siguientes campos</p>
-                                </div>
-                                <InputGroup className='mb-3'>
+
+                                            <InputGroup.Text>
+                                                <FeatherIcon icon="mail" />
+                                            </InputGroup.Text>
+                                        </InputGroup>
+                                    </FormGroup>
+                                    <div className='text-center'>
+                                        <p>Ingrese su nueva contraseña en los siguientes campos</p>
+                                    </div>
+                                    <InputGroup className='mb-3'>
                                         <FormControl
                                             id="newPassword"
                                             type="password"
                                             placeholder='Nueva Contraseña'
                                             aria-label='constraseña'
                                             autoComplete='off'
-                                            name='password'
+                                            name='password' value={formik.values.password} onChange={formik.handleChange}
                                         />
-                                            <InputGroup.Text>
-                                                <FeatherIcon icon="lock"/>
-                                            </InputGroup.Text>
-                                </InputGroup>
-                                <InputGroup className='mb-3'>
+                                        <InputGroup.Text>
+                                            <FeatherIcon icon="lock" />
+                                        </InputGroup.Text>
+                                    </InputGroup>
+                                    <InputGroup className='mb-3'>
                                         <FormControl
                                             id="confNewPassword"
                                             type="password"
                                             placeholder='Confirmar Contraseña'
                                             aria-label='constraseña'
                                             autoComplete='off'
-                                            name='password'
+                                            name='confirmPassword' value={formik.values.confirmPassword} onChange={formik.handleChange}
                                         />
-                                            <InputGroup.Text>
-                                                <FeatherIcon icon="lock"/>
-                                            </InputGroup.Text>
-                                </InputGroup>
-                                <Form.Group className='form-outline mb-4'>
-                                    <div className='d-grid gap-2 text-center pt-1 pb-1'>
-                                        <Button 
-                                            variant='primary'
-                                            className='btn back-blue font-white btn-block'
-                                            type="submit" 
-                                        >
-                                            Cambiar Contraseña
-                                        </Button>
-                                    </div>
-                                </Form.Group>
-                            </Form>
+                                        <InputGroup.Text>
+                                            <FeatherIcon icon="lock" />
+                                        </InputGroup.Text>
+                                    </InputGroup>
+                                    <Form.Group className='form-outline mb-4'>
+                                        <div className='d-grid gap-2 text-center pt-1 pb-1'>
+                                            <Button
+                                                variant='primary'
+                                                className='btn back-blue font-white btn-block'
+                                                type="submit" disabled={!(formik.isValid && formik.dirty)}
+                                            >
+                                                Cambiar Contraseña
+                                            </Button>
+                                        </div>
+                                    </Form.Group>
+                                </Form>
                             </Card.Text>
                         </Card.Body>
                     </Card>
@@ -105,6 +183,6 @@ export const RecoverPassword = () => {
                 <script src="../../dist/js/adminlte.min.js"></script>
             </Container>
         </header>
-    
-      )
+
+    )
 }

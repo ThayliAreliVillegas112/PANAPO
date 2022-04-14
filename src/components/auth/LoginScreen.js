@@ -35,10 +35,9 @@ export const LoginScreen = (props) => {
       password: yup
         .string()
         .required("Campo obligatorio")
-        .min(3, "Mínimo cuatro caracteres"),
+        .min(3, "Mínimo tres caracteres"),
     }),
     onSubmit: (values) => {
-      console.log(values)
       axios({
         url: "/auth/login",
         method: "POST",
@@ -46,8 +45,7 @@ export const LoginScreen = (props) => {
       })
         .then((response) => {
           if (!response.error) {
-            console.log(response.data.token)
-            authContext.signIn(response.data.token)
+            authContext.signIn(response.data.token, response.data.user.username)
 
             //asignar los roles
             let authorities = response.data.user.authorities;
@@ -111,7 +109,7 @@ export const LoginScreen = (props) => {
                 </Col>
                 <Form onSubmit={formik.handleSubmit}>
                   <FormGroup>
-                    <InputGroup className="mb-3">
+                    <InputGroup className="mt-4">
                       <FormControl
                         placeholder="Correo electrónico"
                         id="username"
@@ -125,13 +123,13 @@ export const LoginScreen = (props) => {
                       </InputGroup.Text>
                     </InputGroup>
                     {formik.errors.username ? (
-                      <span className="text-danger">
+                      <p className="text-danger mb-0">
                         {formik.errors.username}
-                      </span>
+                      </p>
                     ) : null}
                   </FormGroup>
                   <FormGroup>
-                    <InputGroup className="mb-3">
+                    <InputGroup className="mt-4">
                       <FormControl
                         placeholder="Contraseña"
                         id="password"
@@ -146,12 +144,12 @@ export const LoginScreen = (props) => {
                       </InputGroup.Text>
                     </InputGroup>
                     {formik.errors.password ? (
-                      <span className="text-danger">
+                      <span className="text-danger mb-0">
                         {formik.errors.password}
                       </span>
                     ) : null}
                   </FormGroup>
-                  <Form.Group className="form-outline mb-4">
+                  <Form.Group className="form-outline mb-4 mt-3">
                     <Col className="d-grid gap-2 text-center pt-1 pb-1">
                       <Button
                         style={{
